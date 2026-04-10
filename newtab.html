@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Tab</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- Main content -->
+    <main class="container">
+      <section class="clock-section">
+        <time id="time" class="time"></time>
+        <p id="date" class="date"></p>
+      </section>
+
+      <section class="favorites-section">
+        <div id="favorites-grid" class="favorites-grid"></div>
+        <button id="add-btn" class="add-btn" title="Add favorite site">&#43;</button>
+      </section>
+    </main>
+
+    <!-- Settings toggle -->
+    <button id="settings-btn" class="settings-btn" title="Settings">&#9881;</button>
+
+    <!-- Settings panel -->
+    <aside id="settings-panel" class="settings-panel" aria-hidden="true">
+      <div class="settings-header">
+        <h2>Settings</h2>
+        <button id="close-settings" class="icon-btn" title="Close">&times;</button>
+      </div>
+      <div class="settings-body">
+        <div class="setting-group">
+          <label for="bg-color">Background Color</label>
+          <input type="color" id="bg-color" class="color-picker" value="#0f172a" />
+        </div>
+        <div class="setting-group">
+          <label for="bg-image">Background Image URL</label>
+          <div class="input-row">
+            <input
+              type="url"
+              id="bg-image"
+              class="text-input"
+              placeholder="https://example.com/photo.jpg"
+            />
+            <button id="apply-bg" class="btn">Apply</button>
+          </div>
+          <button id="clear-bg" class="btn btn-ghost">Clear Image</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Add / Edit favorite modal -->
+    <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal">
+        <h3 id="modal-title">Add Favorite</h3>
+        <div class="form-group">
+          <label for="fav-name">Name</label>
+          <input type="text" id="fav-name" class="text-input" placeholder="Google" maxlength="30" />
+        </div>
+        <div class="form-group">
+          <label for="fav-url">URL</label>
+          <input type="url" id="fav-url" class="text-input" placeholder="https://google.com" />
+        </div>
+        <div class="modal-actions">
+          <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+          <button id="modal-save" class="btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
