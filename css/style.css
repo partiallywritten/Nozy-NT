@@ -36,12 +36,23 @@ body {
 body {
   font-family: var(--font-family);
   background-color: var(--bg-color);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
+  isolation: isolate;
+}
+
+.background-layer {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg-color);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  filter: brightness(var(--bg-image-brightness, 1));
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* ── Layout container ─────────────────────────────────────────── */
@@ -332,6 +343,65 @@ body {
   flex-direction: column;
   gap: 1.1rem;
   overflow-y: auto;
+}
+
+.settings-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) rgba(255, 255, 255, 0.08);
+}
+
+.settings-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.settings-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.settings-body::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+}
+
+.settings-body::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+.settings-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.settings-section > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.78rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid transparent;
+}
+
+.settings-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-section[open] > summary {
+  border-bottom-color: var(--border);
+}
+
+.settings-section-content {
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .setting-group {

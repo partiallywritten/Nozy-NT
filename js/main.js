@@ -27,6 +27,7 @@
     FAVORITES: "ch_favorites",
     BG_COLOR: "ch_bg_color",
     BG_IMAGE: "ch_bg_image",
+    BG_BRIGHTNESS: "ch_bg_brightness",
     HIGHLIGHT_COLOR: "ch_highlight_color",
     TEXT_COLOR: "ch_text_color",
     CLOCK_SIZE: "ch_clock_size",
@@ -40,6 +41,7 @@
   const timeEl = document.getElementById("time");
   const dateEl = document.getElementById("date");
   const favGrid = document.getElementById("favorites-grid");
+  const backgroundLayer = document.getElementById("background-layer");
   const addBtn = document.getElementById("add-btn");
   const settingsBtn = document.getElementById("settings-btn");
   const settingsPanel = document.getElementById("settings-panel");
@@ -52,6 +54,7 @@
   const bgImageError = document.getElementById("bg-image-error");
   const applyBgBtn = document.getElementById("apply-bg");
   const clearBgBtn = document.getElementById("clear-bg");
+  const bgBrightnessInput = document.getElementById("bg-brightness");
   const clockSizeInput = document.getElementById("clock-size");
   const clockXInput = document.getElementById("clock-x");
   const clockYInput = document.getElementById("clock-y");
@@ -108,12 +111,23 @@
    * quote the URL inside a CSS url() value, preventing CSS injection.
    */
   function setBodyBgImage(safeUrl) {
-    document.body.style.backgroundImage = "";
+    backgroundLayer.style.backgroundImage = "";
     if (safeUrl) {
       // JSON.stringify wraps the URL in double-quotes and escapes any embedded
       // double-quotes or backslashes, making it safe for CSS url() values.
-      document.body.style.backgroundImage = "url(" + JSON.stringify(safeUrl) + ")";
+      backgroundLayer.style.backgroundImage = "url(" + JSON.stringify(safeUrl) + ")";
     }
+  }
+
+  function applyBackgroundBrightness() {
+    const raw = localStorage.getItem(STORAGE_KEYS.BG_BRIGHTNESS);
+    const parsed = Number(raw);
+    const brightnessValue = Number.isFinite(parsed)
+      ? Math.max(-100, Math.min(100, parsed))
+      : 0;
+    const brightnessScale = Math.max(0.05, 1 + brightnessValue / 100);
+    bgBrightnessInput.value = String(brightnessValue);
+    document.documentElement.style.setProperty("--bg-image-brightness", String(brightnessScale));
   }
 
   function hexToRgba(hex, alpha) {
@@ -205,6 +219,31 @@
     bgImageInput.value = isLocalDataImage ? "" : safeRemoteUrl;
   }
 
+  function applyLocalBackgroundFile(file) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      bgImageError.textContent = "Please upload an image file.";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const dataUrl = String(event.target.result);
+      if (!dataUrl.startsWith("data:image/")) {
+        bgImageError.textContent = "Could not read this image.";
+        return;
+      }
+      localStorage.setItem(STORAGE_KEYS.BG_IMAGE, dataUrl);
+      bgImageInput.value = "";
+      bgImageInput.removeAttribute("aria-invalid");
+      bgImageError.textContent = "";
+      setBodyBgImage(dataUrl);
+    };
+    reader.onerror = function () {
+      bgImageError.textContent = "Could not read this image.";
+    };
+    reader.readAsDataURL(file);
+  }
+
   bgColorInput.addEventListener("input", function () {
     localStorage.setItem(STORAGE_KEYS.BG_COLOR, this.value);
     document.documentElement.style.setProperty("--bg-color", this.value);
@@ -228,44 +267,31 @@
 
   applyBgBtn.addEventListener("click", function () {
     const raw = bgImageInput.value.trim();
-    if (!raw) return;
-    const safeUrl = sanitizeHttpUrl(raw);
-    if (!safeUrl) {
-      bgImageInput.setAttribute("aria-invalid", "true");
-      bgImageError.textContent = "Please enter a valid http or https image URL.";
-      bgImageInput.focus();
+    if (raw) {
+      const safeUrl = sanitizeHttpUrl(raw);
+      if (!safeUrl) {
+        bgImageInput.setAttribute("aria-invalid", "true");
+        bgImageError.textContent = "Please enter a valid http or https image URL.";
+        bgImageInput.focus();
+        return;
+      }
+      bgImageInput.removeAttribute("aria-invalid");
+      bgImageError.textContent = "";
+      localStorage.setItem(STORAGE_KEYS.BG_IMAGE, safeUrl);
+      setBodyBgImage(safeUrl);
       return;
     }
-    bgImageInput.removeAttribute("aria-invalid");
-    bgImageError.textContent = "";
-    localStorage.setItem(STORAGE_KEYS.BG_IMAGE, safeUrl);
-    setBodyBgImage(safeUrl);
+
+    const file = bgFileInput.files && bgFileInput.files[0];
+    if (file) {
+      applyLocalBackgroundFile(file);
+    }
   });
 
   bgFileInput.addEventListener("change", function () {
     const file = bgFileInput.files && bgFileInput.files[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      bgImageError.textContent = "Please upload an image file.";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const dataUrl = String(event.target.result);
-      if (!dataUrl.startsWith("data:image/")) {
-        bgImageError.textContent = "Could not read this image.";
-        return;
-      }
-      localStorage.setItem(STORAGE_KEYS.BG_IMAGE, dataUrl);
-      bgImageInput.value = "";
-      bgImageInput.removeAttribute("aria-invalid");
-      bgImageError.textContent = "";
-      setBodyBgImage(dataUrl);
-    };
-    reader.onerror = function () {
-      bgImageError.textContent = "Could not read this image.";
-    };
-    reader.readAsDataURL(file);
+    applyLocalBackgroundFile(file);
   });
 
   clearBgBtn.addEventListener("click", function () {
@@ -274,7 +300,12 @@
     bgFileInput.value = "";
     bgImageInput.removeAttribute("aria-invalid");
     bgImageError.textContent = "";
-    document.body.style.backgroundImage = "";
+    setBodyBgImage("");
+  });
+
+  bgBrightnessInput.addEventListener("input", function () {
+    localStorage.setItem(STORAGE_KEYS.BG_BRIGHTNESS, this.value);
+    applyBackgroundBrightness();
   });
 
   bgImageInput.addEventListener("input", function () {
@@ -528,6 +559,7 @@
   /* ── Init ──────────────────────────────────────────────────── */
   applyThemeSettings();
   applyBackground();
+  applyBackgroundBrightness();
   applyClockSettings();
   applyFontSettings();
   renderFavorites();
