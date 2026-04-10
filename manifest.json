@@ -3,6 +3,7 @@
   "name": "Chrome Home",
   "version": "1.0.0",
   "description": "A minimal custom new tab page with time, favorite sites, and a customizable background.",
+  "permissions": ["storage", "unlimitedStorage"],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   }
