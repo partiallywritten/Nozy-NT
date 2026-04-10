@@ -8,6 +8,16 @@
   "use strict";
 
   /* ── Storage keys ──────────────────────────────────────────── */
+  const DEFAULTS = {
+    BG_COLOR: "#003056",
+    HIGHLIGHT_COLOR: "#be9da8",
+    TEXT_COLOR: "#eeb8b7",
+    CLOCK_SIZE: "8",
+    CLOCK_X: "0",
+    CLOCK_Y: "0",
+    FONT_FAMILY: "\"JetBrains Mono\", \"Fira Code\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+  };
+
   const STORAGE_KEYS = {
     FAVORITES: "ch_favorites",
     BG_COLOR: "ch_bg_color",
@@ -103,7 +113,9 @@
 
   function hexToRgba(hex, alpha) {
     const validHex = /^#([A-Fa-f0-9]{6})$/;
-    if (!validHex.test(hex)) return `rgba(238, 184, 183, ${alpha})`;
+    if (!validHex.test(hex)) {
+      return `rgba(${parseInt(DEFAULTS.TEXT_COLOR.slice(1, 3), 16)}, ${parseInt(DEFAULTS.TEXT_COLOR.slice(3, 5), 16)}, ${parseInt(DEFAULTS.TEXT_COLOR.slice(5, 7), 16)}, ${alpha})`;
+    }
     const value = hex.slice(1);
     const r = parseInt(value.slice(0, 2), 16);
     const g = parseInt(value.slice(2, 4), 16);
@@ -125,9 +137,9 @@
   }
 
   function applyThemeSettings() {
-    const bgColor = localStorage.getItem(STORAGE_KEYS.BG_COLOR) || "#003056";
-    const highlightColor = localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_COLOR) || "#be9da8";
-    const textColor = localStorage.getItem(STORAGE_KEYS.TEXT_COLOR) || "#eeb8b7";
+    const bgColor = localStorage.getItem(STORAGE_KEYS.BG_COLOR) || DEFAULTS.BG_COLOR;
+    const highlightColor = localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_COLOR) || DEFAULTS.HIGHLIGHT_COLOR;
+    const textColor = localStorage.getItem(STORAGE_KEYS.TEXT_COLOR) || DEFAULTS.TEXT_COLOR;
 
     document.documentElement.style.setProperty("--bg-color", bgColor);
     document.documentElement.style.setProperty("--accent", highlightColor);
@@ -142,9 +154,9 @@
   }
 
   function applyClockSettings() {
-    const clockSize = localStorage.getItem(STORAGE_KEYS.CLOCK_SIZE) || "8";
-    const clockX = localStorage.getItem(STORAGE_KEYS.CLOCK_X) || "0";
-    const clockY = localStorage.getItem(STORAGE_KEYS.CLOCK_Y) || "0";
+    const clockSize = localStorage.getItem(STORAGE_KEYS.CLOCK_SIZE) || DEFAULTS.CLOCK_SIZE;
+    const clockX = localStorage.getItem(STORAGE_KEYS.CLOCK_X) || DEFAULTS.CLOCK_X;
+    const clockY = localStorage.getItem(STORAGE_KEYS.CLOCK_Y) || DEFAULTS.CLOCK_Y;
 
     clockSizeInput.value = clockSize;
     clockXInput.value = clockX;
@@ -157,7 +169,7 @@
 
   function applyFontSettings() {
     const fontUrl = localStorage.getItem(STORAGE_KEYS.FONT_URL) || "";
-    const fontFamily = localStorage.getItem(STORAGE_KEYS.FONT_FAMILY) || getComputedStyle(document.documentElement).getPropertyValue("--font-family").trim();
+    const fontFamily = localStorage.getItem(STORAGE_KEYS.FONT_FAMILY) || DEFAULTS.FONT_FAMILY;
     fontUrlInput.value = fontUrl;
     fontFamilyInput.value = fontFamily;
     applyCustomFont(fontUrl, fontFamily);
@@ -296,8 +308,7 @@
       localStorage.removeItem(STORAGE_KEYS.FONT_URL);
     }
 
-    const fallbackFont = "\"JetBrains Mono\", \"Fira Code\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace";
-    const fontFamily = rawFamily || fallbackFont;
+    const fontFamily = rawFamily || DEFAULTS.FONT_FAMILY;
     localStorage.setItem(STORAGE_KEYS.FONT_FAMILY, fontFamily);
 
     fontUrlInput.removeAttribute("aria-invalid");
