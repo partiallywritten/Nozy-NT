@@ -17,6 +17,11 @@
     CLOCK_Y: "0",
     FONT_FAMILY: "\"JetBrains Mono\", \"Fira Code\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
   };
+  const DEFAULT_TEXT_RGB = {
+    r: parseInt(DEFAULTS.TEXT_COLOR.slice(1, 3), 16),
+    g: parseInt(DEFAULTS.TEXT_COLOR.slice(3, 5), 16),
+    b: parseInt(DEFAULTS.TEXT_COLOR.slice(5, 7), 16),
+  };
 
   const STORAGE_KEYS = {
     FAVORITES: "ch_favorites",
@@ -112,14 +117,18 @@
   }
 
   function hexToRgba(hex, alpha) {
-    const validHex = /^#([A-Fa-f0-9]{6})$/;
-    if (!validHex.test(hex)) {
-      return `rgba(${parseInt(DEFAULTS.TEXT_COLOR.slice(1, 3), 16)}, ${parseInt(DEFAULTS.TEXT_COLOR.slice(3, 5), 16)}, ${parseInt(DEFAULTS.TEXT_COLOR.slice(5, 7), 16)}, ${alpha})`;
+    function hexToRgb(sourceHex) {
+      const cleaned = sourceHex.slice(1);
+      return {
+        r: parseInt(cleaned.slice(0, 2), 16),
+        g: parseInt(cleaned.slice(2, 4), 16),
+        b: parseInt(cleaned.slice(4, 6), 16),
+      };
     }
-    const value = hex.slice(1);
-    const r = parseInt(value.slice(0, 2), 16);
-    const g = parseInt(value.slice(2, 4), 16);
-    const b = parseInt(value.slice(4, 6), 16);
+
+    const validHex = /^#([A-Fa-f0-9]{6})$/;
+    const rgb = validHex.test(hex) ? hexToRgb(hex) : DEFAULT_TEXT_RGB;
+    const { r, g, b } = rgb;
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
@@ -242,7 +251,7 @@
     }
     const reader = new FileReader();
     reader.onload = function (event) {
-      const dataUrl = String(event.target && event.target.result ? event.target.result : "");
+      const dataUrl = String(event.target.result);
       if (!dataUrl.startsWith("data:image/")) {
         bgImageError.textContent = "Could not read this image.";
         return;
