@@ -90,6 +90,49 @@
   updateClock();
   setInterval(updateClock, 1000);
 
+  /* ── Background (chrome.storage.local) ────────────────────── */
+
+  /**
+   * Read the background image from chrome.storage.local, migrating from
+   * localStorage if a legacy value exists there.
+   */
+  function getBgImage(callback) {
+    chrome.storage.local.get([STORAGE_KEYS.BG_IMAGE], function (result) {
+      const stored = result[STORAGE_KEYS.BG_IMAGE];
+      if (stored) {
+        callback(stored);
+        return;
+      }
+      // Migrate legacy value from localStorage
+      const legacy = localStorage.getItem(STORAGE_KEYS.BG_IMAGE);
+      if (legacy) {
+        const obj = {};
+        obj[STORAGE_KEYS.BG_IMAGE] = legacy;
+        chrome.storage.local.set(obj, function () {
+          localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
+        });
+        callback(legacy);
+        return;
+      }
+      callback("");
+    });
+  }
+
+  /**
+   * Persist the background image URL/data-URI in chrome.storage.local.
+   * Pass an empty string (or falsy value) to clear it.
+   */
+  function saveBgImage(value, callback) {
+    localStorage.removeItem(STORAGE_KEYS.BG_IMAGE); // always clear legacy key
+    if (value) {
+      const obj = {};
+      obj[STORAGE_KEYS.BG_IMAGE] = value;
+      chrome.storage.local.set(obj, callback || function () {});
+    } else {
+      chrome.storage.local.remove(STORAGE_KEYS.BG_IMAGE, callback || function () {});
+    }
+  }
+
   /* ── Background ────────────────────────────────────────────── */
 
   /**
@@ -199,24 +242,25 @@
   }
 
   function applyBackground() {
-    const image = localStorage.getItem(STORAGE_KEYS.BG_IMAGE) || "";
-    if (!image) {
-      setBodyBgImage("");
-      bgImageInput.value = "";
-      return;
-    }
+    getBgImage(function (image) {
+      if (!image) {
+        setBodyBgImage("");
+        bgImageInput.value = "";
+        return;
+      }
 
-    const isLocalDataImage = image.startsWith("data:image/");
-    const safeRemoteUrl = isLocalDataImage ? image : sanitizeHttpUrl(image);
-    if (!safeRemoteUrl) {
-      localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
-      setBodyBgImage("");
-      bgImageInput.value = "";
-      return;
-    }
+      const isLocalDataImage = image.startsWith("data:image/");
+      const safeRemoteUrl = isLocalDataImage ? image : sanitizeHttpUrl(image);
+      if (!safeRemoteUrl) {
+        saveBgImage("");
+        setBodyBgImage("");
+        bgImageInput.value = "";
+        return;
+      }
 
-    setBodyBgImage(safeRemoteUrl);
-    bgImageInput.value = isLocalDataImage ? "" : safeRemoteUrl;
+      setBodyBgImage(safeRemoteUrl);
+      bgImageInput.value = isLocalDataImage ? "" : safeRemoteUrl;
+    });
   }
 
   function applyLocalBackgroundFile(file) {
@@ -236,11 +280,7 @@
       bgImageInput.removeAttribute("aria-invalid");
       bgImageError.textContent = "";
       setBodyBgImage(dataUrl);
-      try {
-        localStorage.setItem(STORAGE_KEYS.BG_IMAGE, dataUrl);
-      } catch (_) {
-        bgImageError.textContent = "Image applied, but it is too large to save. Try a smaller image.";
-      }
+      saveBgImage(dataUrl);
     };
     reader.onerror = function () {
       bgImageError.textContent = "Could not read this image.";
@@ -287,7 +327,7 @@
       }
       bgImageInput.removeAttribute("aria-invalid");
       bgImageError.textContent = "";
-      localStorage.setItem(STORAGE_KEYS.BG_IMAGE, safeUrl);
+      saveBgImage(safeUrl);
       setBodyBgImage(safeUrl);
       return;
     }
@@ -300,7 +340,7 @@
   });
 
   clearBgBtn.addEventListener("click", function () {
-    localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
+    saveBgImage("");
     bgImageInput.value = "";
     bgFileInput.value = "";
     bgImageInput.removeAttribute("aria-invalid");
