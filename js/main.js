@@ -12,6 +12,13 @@
     FAVORITES: "ch_favorites",
     BG_COLOR: "ch_bg_color",
     BG_IMAGE: "ch_bg_image",
+    HIGHLIGHT_COLOR: "ch_highlight_color",
+    TEXT_COLOR: "ch_text_color",
+    CLOCK_SIZE: "ch_clock_size",
+    CLOCK_X: "ch_clock_x",
+    CLOCK_Y: "ch_clock_y",
+    FONT_URL: "ch_font_url",
+    FONT_FAMILY: "ch_font_family",
   };
 
   /* ── DOM references ────────────────────────────────────────── */
@@ -23,10 +30,20 @@
   const settingsPanel = document.getElementById("settings-panel");
   const closeSettings = document.getElementById("close-settings");
   const bgColorInput = document.getElementById("bg-color");
+  const highlightColorInput = document.getElementById("highlight-color");
+  const textColorInput = document.getElementById("text-color");
   const bgImageInput = document.getElementById("bg-image");
+  const bgFileInput = document.getElementById("bg-file");
   const bgImageError = document.getElementById("bg-image-error");
   const applyBgBtn = document.getElementById("apply-bg");
   const clearBgBtn = document.getElementById("clear-bg");
+  const clockSizeInput = document.getElementById("clock-size");
+  const clockXInput = document.getElementById("clock-x");
+  const clockYInput = document.getElementById("clock-y");
+  const fontUrlInput = document.getElementById("font-url");
+  const fontUrlError = document.getElementById("font-url-error");
+  const fontFamilyInput = document.getElementById("font-family");
+  const applyFontBtn = document.getElementById("apply-font");
   const modalOverlay = document.getElementById("modal-overlay");
   const modalTitle = document.getElementById("modal-title");
   const favNameInput = document.getElementById("fav-name");
@@ -61,7 +78,7 @@
    * Validate that a URL has an http/https scheme and return it, or null if invalid.
    * This prevents CSS injection via crafted url() values.
    */
-  function sanitizeImageUrl(raw) {
+  function sanitizeHttpUrl(raw) {
     try {
       const parsed = new URL(raw);
       if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
@@ -84,20 +101,87 @@
     }
   }
 
-  function applyBackground() {
-    const color = localStorage.getItem(STORAGE_KEYS.BG_COLOR) || "#0f172a";
-    const image = localStorage.getItem(STORAGE_KEYS.BG_IMAGE) || "";
+  function hexToRgba(hex, alpha) {
+    const validHex = /^#([A-Fa-f0-9]{6})$/;
+    if (!validHex.test(hex)) return `rgba(238, 184, 183, ${alpha})`;
+    const value = hex.slice(1);
+    const r = parseInt(value.slice(0, 2), 16);
+    const g = parseInt(value.slice(2, 4), 16);
+    const b = parseInt(value.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
 
-    document.documentElement.style.setProperty("--bg-color", color);
-    bgColorInput.value = color;
-
-    if (image) {
-      setBodyBgImage(image);
-      bgImageInput.value = image;
-    } else {
-      document.body.style.backgroundImage = "";
-      bgImageInput.value = "";
+  function applyCustomFont(url, family) {
+    const existing = document.getElementById("custom-font-stylesheet");
+    if (existing) existing.remove();
+    if (url) {
+      const link = document.createElement("link");
+      link.id = "custom-font-stylesheet";
+      link.rel = "stylesheet";
+      link.href = url;
+      document.head.appendChild(link);
     }
+    document.documentElement.style.setProperty("--font-family", family || "inherit");
+  }
+
+  function applyThemeSettings() {
+    const bgColor = localStorage.getItem(STORAGE_KEYS.BG_COLOR) || "#003056";
+    const highlightColor = localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_COLOR) || "#be9da8";
+    const textColor = localStorage.getItem(STORAGE_KEYS.TEXT_COLOR) || "#eeb8b7";
+
+    document.documentElement.style.setProperty("--bg-color", bgColor);
+    document.documentElement.style.setProperty("--accent", highlightColor);
+    document.documentElement.style.setProperty("--accent-hover", hexToRgba(highlightColor, 0.85));
+    document.documentElement.style.setProperty("--text", textColor);
+    document.documentElement.style.setProperty("--text-muted", hexToRgba(textColor, 0.74));
+
+    bgColorInput.value = bgColor;
+    highlightColorInput.value = highlightColor;
+    textColorInput.value = textColor;
+    document.body.style.backgroundColor = bgColor;
+  }
+
+  function applyClockSettings() {
+    const clockSize = localStorage.getItem(STORAGE_KEYS.CLOCK_SIZE) || "8";
+    const clockX = localStorage.getItem(STORAGE_KEYS.CLOCK_X) || "0";
+    const clockY = localStorage.getItem(STORAGE_KEYS.CLOCK_Y) || "0";
+
+    clockSizeInput.value = clockSize;
+    clockXInput.value = clockX;
+    clockYInput.value = clockY;
+
+    document.documentElement.style.setProperty("--clock-size", `${clockSize}rem`);
+    document.documentElement.style.setProperty("--clock-x", `${clockX}px`);
+    document.documentElement.style.setProperty("--clock-y", `${clockY}px`);
+  }
+
+  function applyFontSettings() {
+    const fontUrl = localStorage.getItem(STORAGE_KEYS.FONT_URL) || "";
+    const fontFamily = localStorage.getItem(STORAGE_KEYS.FONT_FAMILY) || getComputedStyle(document.documentElement).getPropertyValue("--font-family").trim();
+    fontUrlInput.value = fontUrl;
+    fontFamilyInput.value = fontFamily;
+    applyCustomFont(fontUrl, fontFamily);
+  }
+
+  function applyBackground() {
+    const image = localStorage.getItem(STORAGE_KEYS.BG_IMAGE) || "";
+    if (!image) {
+      setBodyBgImage("");
+      bgImageInput.value = "";
+      return;
+    }
+
+    const isLocalDataImage = image.startsWith("data:image/");
+    const safeRemoteUrl = isLocalDataImage ? image : sanitizeHttpUrl(image);
+    if (!safeRemoteUrl) {
+      localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
+      setBodyBgImage("");
+      bgImageInput.value = "";
+      return;
+    }
+
+    setBodyBgImage(safeRemoteUrl);
+    bgImageInput.value = isLocalDataImage ? "" : safeRemoteUrl;
   }
 
   bgColorInput.addEventListener("input", function () {
@@ -109,10 +193,22 @@
     }
   });
 
+  highlightColorInput.addEventListener("input", function () {
+    localStorage.setItem(STORAGE_KEYS.HIGHLIGHT_COLOR, this.value);
+    document.documentElement.style.setProperty("--accent", this.value);
+    document.documentElement.style.setProperty("--accent-hover", hexToRgba(this.value, 0.85));
+  });
+
+  textColorInput.addEventListener("input", function () {
+    localStorage.setItem(STORAGE_KEYS.TEXT_COLOR, this.value);
+    document.documentElement.style.setProperty("--text", this.value);
+    document.documentElement.style.setProperty("--text-muted", hexToRgba(this.value, 0.74));
+  });
+
   applyBgBtn.addEventListener("click", function () {
     const raw = bgImageInput.value.trim();
     if (!raw) return;
-    const safeUrl = sanitizeImageUrl(raw);
+    const safeUrl = sanitizeHttpUrl(raw);
     if (!safeUrl) {
       bgImageInput.setAttribute("aria-invalid", "true");
       bgImageError.textContent = "Please enter a valid http or https image URL.";
@@ -125,9 +221,36 @@
     setBodyBgImage(safeUrl);
   });
 
+  bgFileInput.addEventListener("change", function () {
+    const file = bgFileInput.files && bgFileInput.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      bgImageError.textContent = "Please upload an image file.";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const dataUrl = String(event.target && event.target.result ? event.target.result : "");
+      if (!dataUrl.startsWith("data:image/")) {
+        bgImageError.textContent = "Could not read this image.";
+        return;
+      }
+      localStorage.setItem(STORAGE_KEYS.BG_IMAGE, dataUrl);
+      bgImageInput.value = "";
+      bgImageInput.removeAttribute("aria-invalid");
+      bgImageError.textContent = "";
+      setBodyBgImage(dataUrl);
+    };
+    reader.onerror = function () {
+      bgImageError.textContent = "Could not read this image.";
+    };
+    reader.readAsDataURL(file);
+  });
+
   clearBgBtn.addEventListener("click", function () {
     localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
     bgImageInput.value = "";
+    bgFileInput.value = "";
     bgImageInput.removeAttribute("aria-invalid");
     bgImageError.textContent = "";
     document.body.style.backgroundImage = "";
@@ -137,6 +260,55 @@
     if (bgImageInput.getAttribute("aria-invalid")) {
       bgImageInput.removeAttribute("aria-invalid");
       bgImageError.textContent = "";
+    }
+  });
+
+  clockSizeInput.addEventListener("input", function () {
+    localStorage.setItem(STORAGE_KEYS.CLOCK_SIZE, this.value);
+    document.documentElement.style.setProperty("--clock-size", `${this.value}rem`);
+  });
+
+  clockXInput.addEventListener("input", function () {
+    localStorage.setItem(STORAGE_KEYS.CLOCK_X, this.value);
+    document.documentElement.style.setProperty("--clock-x", `${this.value}px`);
+  });
+
+  clockYInput.addEventListener("input", function () {
+    localStorage.setItem(STORAGE_KEYS.CLOCK_Y, this.value);
+    document.documentElement.style.setProperty("--clock-y", `${this.value}px`);
+  });
+
+  applyFontBtn.addEventListener("click", function () {
+    const rawUrl = fontUrlInput.value.trim();
+    const rawFamily = fontFamilyInput.value.trim();
+
+    const safeFontUrl = rawUrl ? sanitizeHttpUrl(rawUrl) : "";
+    if (rawUrl && !safeFontUrl) {
+      fontUrlInput.setAttribute("aria-invalid", "true");
+      fontUrlError.textContent = "Please enter a valid http or https stylesheet URL.";
+      fontUrlInput.focus();
+      return;
+    }
+
+    if (safeFontUrl) {
+      localStorage.setItem(STORAGE_KEYS.FONT_URL, safeFontUrl);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.FONT_URL);
+    }
+
+    const fallbackFont = "\"JetBrains Mono\", \"Fira Code\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace";
+    const fontFamily = rawFamily || fallbackFont;
+    localStorage.setItem(STORAGE_KEYS.FONT_FAMILY, fontFamily);
+
+    fontUrlInput.removeAttribute("aria-invalid");
+    fontUrlError.textContent = "";
+    applyCustomFont(safeFontUrl, fontFamily);
+  });
+
+  fontUrlInput.addEventListener("input", function () {
+    if (fontUrlInput.getAttribute("aria-invalid")) {
+      fontUrlInput.removeAttribute("aria-invalid");
+      fontUrlError.textContent = "";
     }
   });
 
@@ -334,6 +506,9 @@
   });
 
   /* ── Init ──────────────────────────────────────────────────── */
+  applyThemeSettings();
   applyBackground();
+  applyClockSettings();
+  applyFontSettings();
   renderFavorites();
 })();

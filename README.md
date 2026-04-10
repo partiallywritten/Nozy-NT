@@ -1,6 +1,6 @@
 # Chrome Home
 
-A minimal, dark-themed Chrome extension that replaces your new tab page with a clean dashboard featuring a live clock, Google search, favourite sites, and a customizable background.
+A minimalist linux-rice-inspired Chrome extension that replaces your new tab page with a clean dashboard featuring a live clock, Google search, favourite sites, and deep visual customization.
 
 ---
 
@@ -11,7 +11,9 @@ A minimal, dark-themed Chrome extension that replaces your new tab page with a c
 | **Live clock** | Displays the current time (HH:MM:SS) and full date, updated every second |
 | **Google search** | Pill-shaped search bar in the centre of the page — press Enter or click the arrow to search |
 | **Favourite sites** | Add, display, and remove bookmarked sites with favicons; data is stored locally |
-| **Custom background** | Choose a solid colour or paste any `https://` image URL; settings are persisted between sessions |
+| **Rice-style palette** | Default minimalist palette: background `#003056`, highlights `#be9da8`, text `#eeb8b7` |
+| **Custom background** | Choose a solid colour, paste an image `https://` URL, or upload an image from your computer |
+| **Full styling controls** | Customize background/highlight/text colours, clock size and position, and load custom fonts via URL |
 
 ---
 
@@ -63,13 +65,15 @@ Type your query in the search bar and press **Enter**, or click the **→** butt
 - Hover over a tile and click the red **×** badge to remove it.
 - Favicons are fetched automatically; a letter-avatar is used as a fallback.
 
-### Background Customization
+### Background & Style Customization
 1. Click the **⚙ gear icon** (bottom-right corner) to open the Settings panel.
-2. **Background Color** — use the colour picker to change the page background instantly.
-3. **Background Image** — paste any public `https://` image URL and click **Apply**.  
-   Click **Clear Image** to revert to the solid colour.
+2. **Colors** — change background, highlight, and text colors.
+3. **Background Image** — paste any public `https://` image URL and click **Apply**, or upload an image file from your local machine.
+4. **Clock** — adjust clock size and position with sliders.
+5. **Font** — provide a font stylesheet URL (for example Google Fonts CSS URL) and set the font-family string, then click **Apply Font**.
+6. Click **Clear Image** to revert to the solid background color.
 
-All settings (colour, image, and favourites) are stored in `localStorage` and persist across browser restarts.
+All settings (theme, background image, clock controls, font settings, and favourites) are stored in `localStorage` and persist across browser restarts.
 
 ---
 

@@ -63,7 +63,15 @@
       <div class="settings-body">
         <div class="setting-group">
           <label for="bg-color">Background Color</label>
-          <input type="color" id="bg-color" class="color-picker" value="#0f172a" />
+          <input type="color" id="bg-color" class="color-picker" value="#003056" />
+        </div>
+        <div class="setting-group">
+          <label for="highlight-color">Highlight Color</label>
+          <input type="color" id="highlight-color" class="color-picker" value="#be9da8" />
+        </div>
+        <div class="setting-group">
+          <label for="text-color">Text Color</label>
+          <input type="color" id="text-color" class="color-picker" value="#eeb8b7" />
         </div>
         <div class="setting-group">
           <label for="bg-image">Background Image URL</label>
@@ -77,9 +85,45 @@
             />
             <button id="apply-bg" class="btn">Apply</button>
           </div>
+          <div class="input-row">
+            <input type="file" id="bg-file" class="text-input file-input" accept="image/*" />
+          </div>
           <span id="bg-image-error" class="field-error" aria-live="polite"></span>
           <button id="clear-bg" class="btn btn-ghost">Clear Image</button>
         </div>
+        <div class="setting-group">
+          <label for="clock-size">Clock Size</label>
+          <input type="range" id="clock-size" min="2" max="14" step="0.2" value="8" />
+        </div>
+        <div class="setting-group">
+          <label for="clock-x">Clock Position X</label>
+          <input type="range" id="clock-x" min="-300" max="300" step="5" value="0" />
+        </div>
+        <div class="setting-group">
+          <label for="clock-y">Clock Position Y</label>
+          <input type="range" id="clock-y" min="-300" max="300" step="5" value="0" />
+        </div>
+        <div class="setting-group">
+          <label for="font-url">Font Stylesheet URL</label>
+          <input
+            type="url"
+            id="font-url"
+            class="text-input"
+            placeholder="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&display=swap"
+            aria-describedby="font-url-error"
+          />
+          <span id="font-url-error" class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="setting-group">
+          <label for="font-family">Font Family</label>
+          <input
+            type="text"
+            id="font-family"
+            class="text-input"
+            placeholder="'JetBrains Mono', monospace"
+          />
+        </div>
+        <button id="apply-font" class="btn">Apply Font</button>
       </div>
     </aside>
 
