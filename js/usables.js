@@ -30,6 +30,7 @@ var STORAGE_KEYS = {
     FONT_FAMILY: "ch_font_family",
     TAB_NAME: "ch_tab_name",
     FAVICON: "ch_favicon",
+    THEME: "ch_theme",
 };
 
 // --- Cached DOM References ---
@@ -178,7 +179,8 @@ function applyBackground() {
             return;
         }
         var isLocalDataImage = image.startsWith("data:image/");
-        var safeRemoteUrl = isLocalDataImage ? image : sanitizeHttpUrl(image);
+        var isThemeImage = /^themes\/\d+\/background\.jpg$/.test(image);
+        var safeRemoteUrl = (isLocalDataImage || isThemeImage) ? image : sanitizeHttpUrl(image);
 
         if (!safeRemoteUrl) {
             saveBgImage("");
@@ -186,7 +188,7 @@ function applyBackground() {
             return;
         }
         setBodyBgImage(safeRemoteUrl);
-        bgImageInput.value = isLocalDataImage ? "" : safeRemoteUrl;
+        bgImageInput.value = (isLocalDataImage || isThemeImage) ? "" : safeRemoteUrl;
     });
 }
 

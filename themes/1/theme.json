@@ -1,0 +1,16 @@
+{
+  "name": "Default",
+  "bgColor": "#003056",
+  "highlightColor": "#be9da8",
+  "textColor": "#eeb8b7",
+  "clockSize": "8",
+  "clockX": "0",
+  "clockY": "0",
+  "fontUrl": "",
+  "fontFamily": "\"JetBrains Mono\", \"Fira Code\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+  "bgBrightness": "0",
+  "bgImageEnabled": true,
+  "bgImageCap": "1080p",
+  "tabName": "",
+  "favicon": ""
+}
