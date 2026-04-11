@@ -182,7 +182,7 @@ function renderThemeGrid(themes) {
 
 function loadThemesRegistry(onComplete) {
     themesStatus.textContent = "";
-    fetch("themes/themes.json")
+    fetch("themes/included_themes.json")
         .then(function(r) {
             if (!r.ok) throw new Error("Registry not found");
             return r.json();
@@ -216,43 +216,28 @@ function closeThemesOverlay() {
 }
 
 function loadCommunityThemes() {
-    var manifest = (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest)
-        ? chrome.runtime.getManifest() : {};
-    var war = manifest.web_accessible_resources || [];
-    var themeIdSet = new Set();
-    war.forEach(function(entry) {
-        var resources = Array.isArray(entry.resources) ? entry.resources : [];
-        resources.forEach(function(r) {
-            var m = /^themes\/(chu-[a-zA-Z0-9_-]+)\//.exec(r);
-            if (m) themeIdSet.add(m[1]);
-        });
-    });
-
-    var themeIds = Array.from(themeIdSet);
-    if (themeIds.length === 0) return;
-
-    var pending = themeIds.length;
-    var communityThemes = [];
-    themeIds.forEach(function(id) {
-        fetch("themes/" + id + "/theme.json")
-            .then(function(r) {
-                if (!r.ok) throw new Error("Not found");
-                return r.json();
-            })
-            .then(function(data) {
-                var name = (typeof data.name === "string" && data.name.trim())
-                    ? data.name.trim()
-                    : id.replace(/^chu-/, "");
-                communityThemes.push({ id: id, name: name });
-            })
-            .catch(function() {
-                communityThemes.push({ id: id, name: id.replace(/^chu-/, "") });
-            })
-            .finally(function() {
-                pending--;
-                if (pending === 0) appendCommunityThemes(communityThemes);
+    fetch("themes/community_themes.json")
+        .then(function(r) {
+            if (!r.ok) throw new Error("Registry not found");
+            return r.json();
+        })
+        .then(function(data) {
+            if (!Array.isArray(data)) return;
+            var items = [];
+            data.forEach(function(t) {
+                var id = t.id;
+                if (typeof id === "string" && /^chu-[a-zA-Z0-9_-]+$/.test(id)) {
+                    var name = (typeof t.name === "string" && t.name.trim())
+                        ? t.name.trim()
+                        : id.replace(/^chu-/, "");
+                    items.push({ id: id, name: name });
+                }
             });
-    });
+            appendCommunityThemes(items);
+        })
+        .catch(function() {
+            // community_themes.json missing or invalid — nothing to append
+        });
 }
 
 function appendCommunityThemes(items) {
