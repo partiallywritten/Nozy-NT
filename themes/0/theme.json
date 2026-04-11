@@ -1,8 +1,8 @@
 {
   "name": "Default",
-  "bgColor": "#003056",
-  "highlightColor": "#be9da8",
-  "textColor": "#eeb8b7",
+  "bgColor": "#002b4e",
+  "highlightColor": "#d4b5c7",
+  "textColor": "#b6a8c8",
   "clockSize": "8",
   "clockX": "0",
   "clockY": "0",
