@@ -143,6 +143,14 @@ An empty string (`""`) for a string field clears/resets that setting.
   "clockX": "0",
   "clockY": "0",
 
+  "searchWidth": "560",
+  "searchX": "0",
+  "searchY": "0",
+
+  "favX": "0",
+  "favY": "0",
+  "favLayout": "row",
+
   "fontUrl": "https://fonts.googleapis.com/css2?family=Inter&display=swap",
   "fontFamily": "'Inter', sans-serif",
 
@@ -164,8 +172,14 @@ An empty string (`""`) for a string field clears/resets that setting.
 | `highlightColor` | CSS hex color    | `#be9da8` | Accent / highlight color used for interactive elements                      |
 | `textColor`      | CSS hex color    | `#eeb8b7` | Primary text color                                                          |
 | `clockSize`      | numeric string   | `"8"`     | Clock font size in `rem` units (range: `2`–`14`)                            |
-| `clockX`         | numeric string   | `"0"`     | Horizontal offset of the clock in `dvw` units (range: `-50`–`50`)           |
-| `clockY`         | numeric string   | `"0"`     | Vertical offset of the clock in `dvh` units (range: `-50`–`50`)             |
+| `clockX`         | numeric string   | `"0"`     | Horizontal offset of the clock in `dvw` units (range: `-40`–`40`)           |
+| `clockY`         | numeric string   | `"0"`     | Vertical offset of the clock in `dvh` units (range: `-40`–`40`)             |
+| `searchWidth`    | numeric string   | `"560"`   | Width of the search bar in `px` units (range: `100`–`900`)                  |
+| `searchX`        | numeric string   | `"0"`     | Horizontal offset of the search bar in `dvw` units (range: `-40`–`40`)      |
+| `searchY`        | numeric string   | `"0"`     | Vertical offset of the search bar in `dvh` units (range: `-40`–`40`)        |
+| `favX`           | numeric string   | `"0"`     | Horizontal offset of the favorites bar in `dvw` units (range: `-40`–`40`)   |
+| `favY`           | numeric string   | `"0"`     | Vertical offset of the favorites bar in `dvh` units (range: `-40`–`40`)     |
+| `favLayout`      | string           | `"row"`   | Favorites grid layout direction: `"row"` (horizontal) or `"column"` (vertical) |
 | `fontUrl`        | URL string       | `""`      | URL of a CSS font stylesheet (e.g. Google Fonts). `""` = no custom font     |
 | `fontFamily`     | CSS font stack   | monospace stack | CSS `font-family` value applied to the whole page                    |
 | `bgBrightness`   | numeric string   | `"0"`     | Background brightness adjustment (range: `-100`–`100`)                      |
