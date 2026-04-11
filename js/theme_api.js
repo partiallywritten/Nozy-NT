@@ -184,41 +184,6 @@ function applyThemesEnabledSetting() {
     browseThemesBtn.classList.toggle("hidden", !enabled);
 }
 
-// --- Default Theme ---
-
-// When ch_theme is null the extension is in its clean default state.
-// Fetch and display theme 0's background without writing to localStorage so
-// the null state remains ephemeral (it is re-applied on every page load).
-function applyDefaultTheme() {
-    var bgEnabled = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_ENABLED) !== "false";
-    if (!bgEnabled) return;
-
-    fetch("themes/0/background.jpg")
-        .then(function(r) {
-            if (!r.ok) throw new Error("Not found");
-            return r.blob();
-        })
-        .then(function(blob) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var dataUrl = String(e.target.result);
-                var dims = getBgImageCapDimensions();
-                if (!dims) {
-                    setBodyBgImage(dataUrl);
-                } else {
-                    compressImage(dataUrl, dims.width, dims.height, 0.8, function(compressed) {
-                        setBodyBgImage(compressed);
-                    });
-                }
-            };
-            reader.onerror = function() {};
-            reader.readAsDataURL(blob);
-        })
-        .catch(function() {
-            // No background.jpg for the default theme — solid color is shown
-        });
-}
-
 // --- Event Listeners ---
 
 browseThemesBtn.addEventListener("click", openThemesOverlay);
@@ -232,6 +197,23 @@ themesEnabledToggle.addEventListener("change", function() {
 
 // --- Initialization ---
 
+// Ensure the Browse Themes button reflects the stored themes-enabled state on every page load,
+// not just when the settings panel is opened for the first time.
+applyThemesEnabledSetting();
+
+// When ch_theme is null the extension is on its very first launch.
+// Apply and fully persist theme 0 so null only ever occurs once.
 if (localStorage.getItem(STORAGE_KEYS.THEME) === null) {
-    applyDefaultTheme();
+    fetch("themes/0/theme.json")
+        .then(function(r) {
+            if (!r.ok) throw new Error("Not found");
+            return r.json();
+        })
+        .then(function(themeData) {
+            applyThemePreset(themeData, 0);
+        })
+        .catch(function() {
+            // theme.json missing — at minimum persist the id so null is never repeated
+            localStorage.setItem(STORAGE_KEYS.THEME, "0");
+        });
 }
