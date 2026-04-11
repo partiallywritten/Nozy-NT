@@ -1,0 +1,16 @@
+{
+  "name": "Cat Gamer Girl",
+  "bgColor": "#0d0a11",
+  "surfaceColor": "#00231d",
+  "highlightColor": "#00bcff",
+  "textColor": "#d4cbc9",
+  "clockSize": "4",
+  "clockX": "0",
+  "clockY": "0",
+  "fontUrl": "https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap",
+  "fontFamily": "\"Syne\", sans-serif",
+  "bgBrightness": "-31",
+  "bgImageEnabled": true,
+  "tabName": "🎭 Come home",
+  "favicon": ""
+}

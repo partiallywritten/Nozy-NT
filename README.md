@@ -29,7 +29,7 @@
 
 
 ## Theming
-This extension supports theming via [theming API](/themes/README.md). It comes with set of themes made by me which will be shown under "Included" section in theme browser panel.
+This extension supports theming via [theming API](/themes/README.md). It comes with set of themes made by me which will be shown under "Included" section in theme browser panel. See all available themes [here](https://github.com/partiallywritten/chrome-home/blob/main/themes/included_themes.json)
 
 To install community themes:
  - Move the theme folder starting with "chu-" prefix inside the `themes` directory.
