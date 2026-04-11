@@ -705,6 +705,10 @@ input[type="range"] {
   width: 100%;
 }
 
+.browse-themes-btn.hidden {
+  display: none;
+}
+
 /* ── Themes overlay ───────────────────────────────────────────── */
 .themes-overlay {
   position: fixed;
