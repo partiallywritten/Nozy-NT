@@ -66,6 +66,8 @@ function sanitizeHttpUrl(raw) {
 
 // --- Background Helpers ---
 
+var DEFAULT_BG_IMAGE = "img/default.png";
+
 function getBgImage(callback) {
     chrome.storage.local.get([STORAGE_KEYS.BG_IMAGE], function(result) {
         var stored = result[STORAGE_KEYS.BG_IMAGE];
@@ -163,13 +165,12 @@ function applyBackground() {
 
     if (!enabled) {
         setBodyBgImage("");
-        bgImageInput.value = "";
         return;
     }
 
     getBgImage(function(image) {
         if (!image) {
-            setBodyBgImage("img/default.png");
+            setBodyBgImage(DEFAULT_BG_IMAGE);
             bgImageInput.value = "";
             return;
         }
@@ -178,7 +179,7 @@ function applyBackground() {
 
         if (!safeRemoteUrl) {
             saveBgImage("");
-            setBodyBgImage("img/default.png");
+            setBodyBgImage(DEFAULT_BG_IMAGE);
             bgImageInput.value = "";
             return;
         }
