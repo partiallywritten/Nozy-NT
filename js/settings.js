@@ -47,6 +47,31 @@ var restoreDefaultsBtn = document.getElementById("restore-defaults");
 
 // --- Settings-only Utilities ---
 
+function compressImage(dataUrl, maxWidth, maxHeight, quality, callback) {
+    var img = new Image();
+    img.onload = function() {
+        var width = img.naturalWidth;
+        var height = img.naturalHeight;
+        if (width > maxWidth || height > maxHeight) {
+            var scale = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+        }
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        callback(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = function() {
+        callback(dataUrl);
+    };
+    img.src = dataUrl;
+}
+
 function readImageFile(file, errorElement, onSuccess) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -101,8 +126,10 @@ function applyLocalBackgroundFile(file) {
     readImageFile(file, bgImageError, function(dataUrl) {
         bgImageInput.value = "";
         bgImageInput.removeAttribute("aria-invalid");
-        setBodyBgImage(dataUrl);
-        saveBgImage(dataUrl);
+        compressImage(dataUrl, 1920, 1080, 0.8, function(compressed) {
+            setBodyBgImage(compressed);
+            saveBgImage(compressed);
+        });
     });
 }
 
