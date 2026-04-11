@@ -31,6 +31,7 @@ var STORAGE_KEYS = {
     TAB_NAME: "ch_tab_name",
     FAVICON: "ch_favicon",
     THEME: "ch_theme",
+    THEMES_ENABLED: "ch_themes_enabled",
 };
 
 // --- Cached DOM References ---
@@ -179,8 +180,7 @@ function applyBackground() {
             return;
         }
         var isLocalDataImage = image.startsWith("data:image/");
-        var isThemeImage = /^themes\/\d+\/background\.jpg$/.test(image);
-        var safeRemoteUrl = (isLocalDataImage || isThemeImage) ? image : sanitizeHttpUrl(image);
+        var safeRemoteUrl = isLocalDataImage ? image : sanitizeHttpUrl(image);
 
         if (!safeRemoteUrl) {
             saveBgImage("");
@@ -188,7 +188,7 @@ function applyBackground() {
             return;
         }
         setBodyBgImage(safeRemoteUrl);
-        bgImageInput.value = (isLocalDataImage || isThemeImage) ? "" : safeRemoteUrl;
+        bgImageInput.value = isLocalDataImage ? "" : safeRemoteUrl;
     });
 }
 

@@ -46,7 +46,10 @@ var faviconFileInput = document.getElementById("favicon-file");
 var applyFaviconBtn = document.getElementById("apply-favicon");
 var clearFaviconBtn = document.getElementById("clear-favicon");
 var restoreDefaultsBtn = document.getElementById("restore-defaults");
+var browseThemesBtn = document.getElementById("browse-themes-btn");
+var themesEnabledToggle = document.getElementById("themes-enabled-toggle");
 
+var themesOverlay = document.getElementById("themes-overlay");
 var themesGrid = document.getElementById("themes-grid");
 var themesStatus = document.getElementById("themes-status");
 
@@ -129,6 +132,7 @@ function clearErrorOnInput(inputEl, errorEl) {
 
 function getBgImageCapDimensions() {
     var cap = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_CAP) || DEFAULTS.BG_IMAGE_CAP;
+    if (cap === "default") return null;
     if (cap === "4K") return { width: 3840, height: 2160 };
     if (cap === "1440p") return { width: 2560, height: 1440 };
     return { width: 1920, height: 1080 };
@@ -139,6 +143,11 @@ function applyLocalBackgroundFile(file) {
         bgImageInput.value = "";
         bgImageInput.removeAttribute("aria-invalid");
         var dims = getBgImageCapDimensions();
+        if (!dims) {
+            setBodyBgImage(dataUrl);
+            saveBgImage(dataUrl);
+            return;
+        }
         compressImage(dataUrl, dims.width, dims.height, 0.8, function(compressed) {
             setBodyBgImage(compressed);
             saveBgImage(compressed);
@@ -191,19 +200,48 @@ function applyThemePreset(theme, themeId) {
     // Store active theme ID
     localStorage.setItem(STORAGE_KEYS.THEME, String(themeId));
 
-    // Set theme background image
-    var themeBgPath = "themes/" + themeId + "/background.jpg";
-    saveBgImage(bgEnabled ? themeBgPath : "", function() {
-        applyBackground();
-    });
-
-    // Re-apply all other settings
+    // Re-apply all settings (except background — handled below)
     applyThemeSettings();
     applyBackgroundBrightness();
     applyBgImageCapSetting();
     applyClockSettings();
     applyFontSettings();
     applyGeneralSettings();
+
+    // Fetch the theme background image, process through canvas (respecting cap), save as data URL
+    if (!bgEnabled) {
+        saveBgImage("", function() { applyBackground(); });
+    } else {
+        var themeBgUrl = "themes/" + themeId + "/background.jpg";
+        fetch(themeBgUrl)
+            .then(function(r) {
+                if (!r.ok) throw new Error("Image not found");
+                return r.blob();
+            })
+            .then(function(blob) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var dataUrl = String(e.target.result);
+                    var dims = getBgImageCapDimensions();
+                    if (!dims) {
+                        setBodyBgImage(dataUrl);
+                        saveBgImage(dataUrl);
+                    } else {
+                        compressImage(dataUrl, dims.width, dims.height, 0.8, function(compressed) {
+                            setBodyBgImage(compressed);
+                            saveBgImage(compressed);
+                        });
+                    }
+                };
+                reader.onerror = function() {
+                    applyBackground();
+                };
+                reader.readAsDataURL(blob);
+            })
+            .catch(function() {
+                applyBackground();
+            });
+    }
 
     // Update active state in theme grid
     renderThemeActiveState(themeId);
@@ -284,10 +322,27 @@ function loadThemesRegistry() {
         });
 }
 
+function openThemesOverlay() {
+    themesOverlay.classList.remove("hidden");
+    themesOverlay.setAttribute("aria-hidden", "false");
+    loadThemesRegistry();
+}
+
+function closeThemesOverlay() {
+    themesOverlay.classList.add("hidden");
+    themesOverlay.setAttribute("aria-hidden", "true");
+}
+
+function applyThemesEnabledSetting() {
+    var enabled = localStorage.getItem(STORAGE_KEYS.THEMES_ENABLED) === "true";
+    themesEnabledToggle.checked = enabled;
+    browseThemesBtn.classList.toggle("hidden", !enabled);
+}
+
 function openSettings() {
     settingsPanel.classList.add("open");
     settingsPanel.setAttribute("aria-hidden", "false");
-    loadThemesRegistry();
+    applyThemesEnabledSetting();
 }
 
 function closeSettingsPanel() {
@@ -330,6 +385,7 @@ function restoreAllDefaults() {
         }
     });
     saveBgImage("");
+    closeThemesOverlay();
     applyThemeSettings();
     applyBackground();
     applyBackgroundBrightness();
@@ -337,6 +393,7 @@ function restoreAllDefaults() {
     applyClockSettings();
     applyFontSettings();
     applyGeneralSettings();
+    applyThemesEnabledSetting();
     renderThemeActiveState(0);
 }
 
@@ -348,14 +405,27 @@ closeSettingsBtn.addEventListener("click", closeSettingsPanel);
 addBtn.addEventListener("click", openModal);
 modalCancel.addEventListener("click", closeModal);
 
+browseThemesBtn.addEventListener("click", openThemesOverlay);
+document.getElementById("close-themes-btn").addEventListener("click", closeThemesOverlay);
+
+themesEnabledToggle.addEventListener("change", function() {
+    localStorage.setItem(STORAGE_KEYS.THEMES_ENABLED, this.checked ? "true" : "false");
+    browseThemesBtn.classList.toggle("hidden", !this.checked);
+    if (!this.checked) closeThemesOverlay();
+});
+
 modalOverlay.addEventListener("click", function(e) {
     if (e.target === modalOverlay) closeModal();
 });
 
 document.addEventListener("keydown", function(e) {
     if (e.key === "Escape") {
-        closeSettingsPanel();
-        closeModal();
+        if (!themesOverlay.classList.contains("hidden")) {
+            closeThemesOverlay();
+        } else {
+            closeSettingsPanel();
+            closeModal();
+        }
     }
 });
 

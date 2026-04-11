@@ -90,7 +90,7 @@ All fields are optional. Omitted fields keep the user's existing value.
 | `fontFamily`     | CSS font stack   | CSS `font-family` value applied to the whole page                          |
 | `bgBrightness`   | numeric string   | Background image brightness adjustment (range: `-100`–`100`, default `"0"`) |
 | `bgImageEnabled` | boolean          | Whether the background image is shown (`true`) or hidden (`false`)         |
-| `bgImageCap`     | `"1080p"` \| `"1440p"` \| `"4K"` | Maximum resolution cap for uploaded background images    |
+| `bgImageCap`     | `"default"` \| `"1080p"` \| `"1440p"` \| `"4K"` | Maximum resolution cap when processing the background image. `"default"` saves the image without any scaling or re-encoding. |
 | `tabName`        | string           | Browser tab title. Empty string = `"New Tab"`                             |
 | `favicon`        | URL string       | URL of a custom favicon image. Empty string = browser default              |
 

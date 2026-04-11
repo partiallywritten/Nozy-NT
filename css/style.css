@@ -697,6 +697,55 @@ input[type="range"] {
   padding: 1rem 1.35rem;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.browse-themes-btn {
+  width: 100%;
+}
+
+/* ── Themes overlay ───────────────────────────────────────────── */
+.themes-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--panel-width);
+  height: 100%;
+  background: rgba(0, 20, 40, 0.98);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 210;
+}
+
+.themes-overlay.hidden {
+  display: none;
+}
+
+.themes-overlay__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.35rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.themes-overlay__header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.themes-overlay__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 /* ── Theme grid ───────────────────────────────────────────────── */
@@ -764,6 +813,10 @@ input[type="range"] {
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .settings-panel {
+    width: 100%;
+  }
+
+  .themes-overlay {
     width: 100%;
   }
 
