@@ -17,6 +17,7 @@ var bgImageError = document.getElementById("bg-image-error");
 var applyBgBtn = document.getElementById("apply-bg");
 var clearBgBtn = document.getElementById("clear-bg");
 var bgBrightnessInput = document.getElementById("bg-brightness");
+var bgImageCapSelect = document.getElementById("bg-image-cap");
 
 var clockSizeInput = document.getElementById("clock-size");
 var clockXInput = document.getElementById("clock-x");
@@ -46,6 +47,31 @@ var clearFaviconBtn = document.getElementById("clear-favicon");
 var restoreDefaultsBtn = document.getElementById("restore-defaults");
 
 // --- Settings-only Utilities ---
+
+function compressImage(dataUrl, maxWidth, maxHeight, quality, callback) {
+    var img = new Image();
+    img.onload = function() {
+        var width = img.naturalWidth;
+        var height = img.naturalHeight;
+        if (width > maxWidth || height > maxHeight) {
+            var scale = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+        }
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        callback(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = function() {
+        callback(dataUrl);
+    };
+    img.src = dataUrl;
+}
 
 function readImageFile(file, errorElement, onSuccess) {
     if (!file) return;
@@ -97,12 +123,22 @@ function clearErrorOnInput(inputEl, errorEl) {
 
 // --- Settings-only Helpers ---
 
+function getBgImageCapDimensions() {
+    var cap = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_CAP) || DEFAULTS.BG_IMAGE_CAP;
+    if (cap === "4K") return { width: 3840, height: 2160 };
+    if (cap === "1440p") return { width: 2560, height: 1440 };
+    return { width: 1920, height: 1080 };
+}
+
 function applyLocalBackgroundFile(file) {
     readImageFile(file, bgImageError, function(dataUrl) {
         bgImageInput.value = "";
         bgImageInput.removeAttribute("aria-invalid");
-        setBodyBgImage(dataUrl);
-        saveBgImage(dataUrl);
+        var dims = getBgImageCapDimensions();
+        compressImage(dataUrl, dims.width, dims.height, 0.8, function(compressed) {
+            setBodyBgImage(compressed);
+            saveBgImage(compressed);
+        });
     });
 }
 
@@ -165,6 +201,7 @@ function restoreAllDefaults() {
     applyThemeSettings();
     applyBackground();
     applyBackgroundBrightness();
+    applyBgImageCapSetting();
     applyClockSettings();
     applyFontSettings();
     applyGeneralSettings();
@@ -241,6 +278,10 @@ clockYInput.addEventListener("input", function() {
 bgBrightnessInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.BG_BRIGHTNESS, this.value);
     applyBackgroundBrightness();
+});
+
+bgImageCapSelect.addEventListener("change", function() {
+    localStorage.setItem(STORAGE_KEYS.BG_IMAGE_CAP, this.value);
 });
 
 bgFileInput.addEventListener("change", function() {
