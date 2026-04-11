@@ -40,6 +40,9 @@ function applyThemePreset(theme, themeId) {
     set(STORAGE_KEYS.CLOCK_SIZE, theme.clockSize);
     set(STORAGE_KEYS.CLOCK_X, theme.clockX);
     set(STORAGE_KEYS.CLOCK_Y, theme.clockY);
+    set(STORAGE_KEYS.SEARCH_WIDTH, theme.searchWidth);
+    set(STORAGE_KEYS.SEARCH_X, theme.searchX);
+    set(STORAGE_KEYS.SEARCH_Y, theme.searchY);
     set(STORAGE_KEYS.FONT_URL, theme.fontUrl);
     set(STORAGE_KEYS.FONT_FAMILY, theme.fontFamily);
     set(STORAGE_KEYS.BG_BRIGHTNESS, theme.bgBrightness);
@@ -61,6 +64,7 @@ function applyThemePreset(theme, themeId) {
     applyBackgroundBrightness();
     applyBgImageCapSetting();
     applyClockSettings();
+    applySearchBarSettings();
     applyFontSettings();
     applyGeneralSettings();
 

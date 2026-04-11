@@ -232,9 +232,9 @@ function applyClockSettings() {
     var clockX = localStorage.getItem(STORAGE_KEYS.CLOCK_X) || DEFAULTS.CLOCK_X;
     var clockY = localStorage.getItem(STORAGE_KEYS.CLOCK_Y) || DEFAULTS.CLOCK_Y;
 
-    // Migrate old pixel values (outside the ±50 dvw/dvh range) back to default
-    if (Math.abs(Number(clockX)) > 50) clockX = DEFAULTS.CLOCK_X;
-    if (Math.abs(Number(clockY)) > 50) clockY = DEFAULTS.CLOCK_Y;
+    // Migrate old values (outside the ±40 dvw/dvh range) back to default
+    if (Math.abs(Number(clockX)) > 40) clockX = DEFAULTS.CLOCK_X;
+    if (Math.abs(Number(clockY)) > 40) clockY = DEFAULTS.CLOCK_Y;
 
     document.getElementById("clock-size").value = clockSize;
     document.getElementById("clock-x").value = clockX;
@@ -249,9 +249,9 @@ function applySearchBarSettings() {
     var searchX = localStorage.getItem(STORAGE_KEYS.SEARCH_X) || DEFAULTS.SEARCH_X;
     var searchY = localStorage.getItem(STORAGE_KEYS.SEARCH_Y) || DEFAULTS.SEARCH_Y;
 
-    // Migrate old pixel values (outside the ±50 dvw/dvh range) back to default
-    if (Math.abs(Number(searchX)) > 50) searchX = DEFAULTS.SEARCH_X;
-    if (Math.abs(Number(searchY)) > 50) searchY = DEFAULTS.SEARCH_Y;
+    // Migrate old values (outside the ±40 dvw/dvh range) back to default
+    if (Math.abs(Number(searchX)) > 40) searchX = DEFAULTS.SEARCH_X;
+    if (Math.abs(Number(searchY)) > 40) searchY = DEFAULTS.SEARCH_Y;
 
     document.getElementById("search-width").value = searchWidth;
     document.getElementById("search-x").value = searchX;
