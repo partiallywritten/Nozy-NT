@@ -3,8 +3,7 @@
 // --- DOM Elements ---
 var browseThemesBtn = document.getElementById("browse-themes-btn");
 var themesEnabledToggle = document.getElementById("themes-enabled-toggle");
-var customThemesEnabledToggle = document.getElementById("custom-themes-toggle");
-var customThemesSetting = document.getElementById("custom-themes-setting");
+var communityThemesToggle = document.getElementById("community-themes-toggle");
 var themesOverlay = document.getElementById("themes-overlay");
 var themesGrid = document.getElementById("themes-grid");
 var themesStatus = document.getElementById("themes-status");
@@ -157,7 +156,6 @@ function renderThemeGrid(themes) {
     var activeId = getActiveThemeId();
 
     var includedItems = [];
-    var communityItems = [];
 
     themes.forEach(function (t) {
         var id = t.id;
@@ -165,8 +163,6 @@ function renderThemeGrid(themes) {
             var safeId = Math.floor(Number(id));
             if (!Number.isFinite(safeId) || safeId < 0) return;
             includedItems.push({ id: String(safeId), name: t.name });
-        } else if (typeof id === "string" && /^chu-[a-zA-Z0-9_-]+$/.test(id)) {
-            communityItems.push({ id: id, name: t.name });
         }
     });
 
@@ -182,7 +178,6 @@ function renderThemeGrid(themes) {
     }
 
     appendSection("Included", includedItems);
-    appendSection("Community", communityItems);
 }
 
 function loadThemesRegistry(onComplete) {
@@ -210,7 +205,9 @@ function loadThemesRegistry(onComplete) {
 function openThemesOverlay() {
     themesOverlay.classList.remove("hidden");
     themesOverlay.setAttribute("aria-hidden", "false");
-    loadThemesRegistry(localStorage.getItem(STORAGE_KEYS.CUSTOM_THEMES_ENABLED) === "true" ? loadCommunityThemes : null);
+    var communityEnabled = localStorage.getItem(STORAGE_KEYS.CUSTOM_THEMES_ENABLED) === "true";
+    communityThemesToggle.checked = communityEnabled;
+    loadThemesRegistry(communityEnabled ? loadCommunityThemes : null);
 }
 
 function closeThemesOverlay() {
@@ -299,8 +296,6 @@ function applyThemesEnabledSetting() {
     var enabled = localStorage.getItem(STORAGE_KEYS.THEMES_ENABLED) === "true";
     themesEnabledToggle.checked = enabled;
     browseThemesBtn.classList.toggle("hidden", !enabled);
-    customThemesSetting.classList.toggle("hidden", !enabled);
-    customThemesEnabledToggle.checked = enabled && localStorage.getItem(STORAGE_KEYS.CUSTOM_THEMES_ENABLED) === "true";
 }
 
 // --- Event Listeners ---
@@ -311,15 +306,16 @@ document.getElementById("close-themes-btn").addEventListener("click", closeTheme
 themesEnabledToggle.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.THEMES_ENABLED, this.checked ? "true" : "false");
     browseThemesBtn.classList.toggle("hidden", !this.checked);
-    customThemesSetting.classList.toggle("hidden", !this.checked);
     if (!this.checked) {
         closeThemesOverlay();
-        customThemesEnabledToggle.checked = false;
     }
 });
 
-customThemesEnabledToggle.addEventListener("change", function() {
+communityThemesToggle.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.CUSTOM_THEMES_ENABLED, this.checked ? "true" : "false");
+    if (this.checked) {
+        loadCommunityThemes();
+    }
 });
 
 // --- Initialization ---
