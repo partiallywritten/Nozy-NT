@@ -18,6 +18,7 @@ var STORAGE_KEYS = {
     FAVORITES: "ch_favorites",
     BG_COLOR: "ch_bg_color",
     BG_IMAGE: "ch_bg_image",
+    BG_IMAGE_ENABLED: "ch_bg_image_enabled",
     BG_BRIGHTNESS: "ch_bg_brightness",
     BG_IMAGE_CAP: "ch_bg_image_cap",
     HIGHLIGHT_COLOR: "ch_highlight_color",
@@ -155,9 +156,20 @@ function applyThemeSettings() {
 
 function applyBackground() {
     var bgImageInput = document.getElementById("bg-image");
+    var bgImageToggle = document.getElementById("bg-image-toggle");
+    var enabled = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_ENABLED) !== "false";
+
+    if (bgImageToggle) bgImageToggle.checked = enabled;
+
+    if (!enabled) {
+        setBodyBgImage("");
+        bgImageInput.value = "";
+        return;
+    }
+
     getBgImage(function(image) {
         if (!image) {
-            setBodyBgImage("");
+            setBodyBgImage("img/default.png");
             bgImageInput.value = "";
             return;
         }
@@ -166,7 +178,7 @@ function applyBackground() {
 
         if (!safeRemoteUrl) {
             saveBgImage("");
-            setBodyBgImage("");
+            setBodyBgImage("img/default.png");
             bgImageInput.value = "";
             return;
         }

@@ -18,6 +18,7 @@ var applyBgBtn = document.getElementById("apply-bg");
 var clearBgBtn = document.getElementById("clear-bg");
 var bgBrightnessInput = document.getElementById("bg-brightness");
 var bgImageCapSelect = document.getElementById("bg-image-cap");
+var bgImageToggle = document.getElementById("bg-image-toggle");
 
 var clockSizeInput = document.getElementById("clock-size");
 var clockXInput = document.getElementById("clock-x");
@@ -273,6 +274,11 @@ clockYInput.addEventListener("input", function() {
 });
 
 // Background Controls
+bgImageToggle.addEventListener("change", function() {
+    localStorage.setItem(STORAGE_KEYS.BG_IMAGE_ENABLED, this.checked ? "true" : "false");
+    applyBackground();
+});
+
 bgBrightnessInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.BG_BRIGHTNESS, this.value);
     docStyle.setProperty("--bg-image-brightness", String(brightnessScale(this.value)));
