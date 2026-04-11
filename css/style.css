@@ -11,6 +11,7 @@
   --bg-color: #003056;
   --surface: rgba(0, 48, 86, 0.52);
   --surface-hover: rgba(190, 157, 168, 0.16);
+  --panel-bg: rgba(0, 48, 86, 0.95);
   --border: rgba(238, 184, 183, 0.22);
   --text: #eeb8b7;
   --text-muted: rgba(238, 184, 183, 0.74);
@@ -25,6 +26,9 @@
   --clock-size: 8rem;
   --clock-x: 0px;
   --clock-y: 0px;
+  --search-width: 560px;
+  --search-x: 0px;
+  --search-y: 0px;
   --font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
@@ -100,11 +104,13 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
+  transform: translate(var(--search-x), var(--search-y));
+  transition: transform var(--transition);
 }
 
 .search-form {
   width: 100%;
-  max-width: 560px;
+  max-width: var(--search-width);
 }
 
 .search-bar {
@@ -316,7 +322,7 @@ body {
   right: 0;
   width: var(--panel-width);
   height: 100vh;
-  background: rgba(0, 32, 58, 0.95);
+  background: var(--panel-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-left: 1px solid var(--border);
@@ -489,6 +495,60 @@ body {
   background: transparent;
 }
 
+.color-group {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.color-group label {
+  flex: 1;
+  min-width: 0;
+}
+
+.color-control {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.hex-input {
+  width: 5.5rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-family: inherit;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.hex-input:focus {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+}
+
+.hex-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  background: transparent;
+  flex-shrink: 0;
+}
+
 .text-input,
 input[type="range"] {
   width: 100%;
@@ -593,7 +653,7 @@ input[type="range"] {
 }
 
 .modal {
-  background: rgba(0, 32, 58, 0.98);
+  background: var(--panel-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.35rem;
@@ -755,7 +815,7 @@ input[type="range"] {
   right: 0;
   width: var(--panel-width);
   height: 100%;
-  background: rgba(0, 20, 40, 0.98);
+  background: var(--panel-bg);
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
