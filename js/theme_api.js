@@ -11,6 +11,20 @@ var themesStatus = document.getElementById("themes-status");
 
 // --- Themes ---
 
+function getActiveThemeId() {
+    var storedId = localStorage.getItem(STORAGE_KEYS.THEME);
+    if (storedId === null) return 0;
+    if (storedId === "user") return null;
+    if (/^chu-/.test(storedId)) return storedId;
+    return Number(storedId);
+}
+
+function isThemeActive(idStr, activeId) {
+    if (activeId === null) return false;
+    if (typeof activeId === "number") return Number(idStr) === activeId;
+    return idStr === activeId;
+}
+
 function applyThemePreset(theme, themeId) {
     // Write theme settings to localStorage.
     // null/undefined = omitted (keep user value); empty string = remove key; any other value = set key.
@@ -92,17 +106,9 @@ function applyThemePreset(theme, themeId) {
 function renderThemeActiveState(activeId) {
     var cards = themesGrid.querySelectorAll(".theme-card");
     cards.forEach(function (card) {
-        var cardId = card.dataset.themeId;
-        var isActive;
-        if (activeId === null || activeId === undefined) {
-            isActive = false;
-        } else if (typeof activeId === "number") {
-            isActive = Number(cardId) === activeId;
-        } else {
-            isActive = cardId === activeId;
-        }
-        card.classList.toggle("theme-card--active", isActive);
-        card.setAttribute("aria-pressed", isActive ? "true" : "false");
+        var active = isThemeActive(card.dataset.themeId, activeId);
+        card.classList.toggle("theme-card--active", active);
+        card.setAttribute("aria-pressed", active ? "true" : "false");
     });
 }
 
@@ -148,12 +154,7 @@ function createThemeCard(idStr, name, isActive) {
 
 function renderThemeGrid(themes) {
     themesGrid.innerHTML = "";
-    var storedId = localStorage.getItem(STORAGE_KEYS.THEME);
-    var activeId;
-    if (storedId === null) activeId = 0;
-    else if (storedId === "user") activeId = null;
-    else if (/^chu-/.test(storedId)) activeId = storedId;
-    else activeId = Number(storedId);
+    var activeId = getActiveThemeId();
 
     var includedItems = [];
     var communityItems = [];
@@ -163,9 +164,9 @@ function renderThemeGrid(themes) {
         if (typeof id === "number" || (typeof id === "string" && /^\d+$/.test(id))) {
             var safeId = Math.floor(Number(id));
             if (!Number.isFinite(safeId) || safeId < 0) return;
-            includedItems.push({ idStr: String(safeId), name: t.name });
+            includedItems.push({ id: String(safeId), name: t.name });
         } else if (typeof id === "string" && /^chu-[a-zA-Z0-9_-]+$/.test(id)) {
-            communityItems.push({ idStr: id, name: t.name });
+            communityItems.push({ id: id, name: t.name });
         }
     });
 
@@ -176,10 +177,7 @@ function renderThemeGrid(themes) {
         sectionLabel.textContent = label;
         themesGrid.appendChild(sectionLabel);
         items.forEach(function (item) {
-            var isActive = activeId === null ? false :
-                           typeof activeId === "number" ? Number(item.idStr) === activeId :
-                           item.idStr === activeId;
-            themesGrid.appendChild(createThemeCard(item.idStr, item.name, isActive));
+            themesGrid.appendChild(createThemeCard(item.id, item.name, isThemeActive(item.id, activeId)));
         });
     }
 
@@ -212,11 +210,7 @@ function loadThemesRegistry(onComplete) {
 function openThemesOverlay() {
     themesOverlay.classList.remove("hidden");
     themesOverlay.setAttribute("aria-hidden", "false");
-    if (localStorage.getItem(STORAGE_KEYS.CUSTOM_THEMES_ENABLED) === "true") {
-        loadThemesRegistry(loadCommunityThemes);
-    } else {
-        loadThemesRegistry();
-    }
+    loadThemesRegistry(localStorage.getItem(STORAGE_KEYS.CUSTOM_THEMES_ENABLED) === "true" ? loadCommunityThemes : null);
 }
 
 function closeThemesOverlay() {
@@ -267,12 +261,7 @@ function loadCommunityThemes() {
 function appendCommunityThemes(items) {
     if (!items.length) return;
 
-    var storedId = localStorage.getItem(STORAGE_KEYS.THEME);
-    var activeId;
-    if (storedId === null) activeId = 0;
-    else if (storedId === "user") activeId = null;
-    else if (/^chu-/.test(storedId)) activeId = storedId;
-    else activeId = Number(storedId);
+    var activeId = getActiveThemeId();
 
     // Find an existing Community section label (added by renderThemeGrid or a prior call)
     var communityLabel = null;
@@ -302,10 +291,7 @@ function appendCommunityThemes(items) {
     }
 
     newItems.forEach(function(item) {
-        var isActive = activeId === null ? false :
-                       typeof activeId === "number" ? Number(item.id) === activeId :
-                       item.id === activeId;
-        themesGrid.appendChild(createThemeCard(item.id, item.name, isActive));
+        themesGrid.appendChild(createThemeCard(item.id, item.name, isThemeActive(item.id, activeId)));
     });
 }
 
