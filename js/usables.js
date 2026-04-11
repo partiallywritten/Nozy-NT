@@ -34,6 +34,7 @@ var STORAGE_KEYS = {
 
 // --- Cached DOM References ---
 var docStyle = document.documentElement.style;
+var backgroundLayer = document.getElementById("background-layer");
 
 // --- Core Utilities ---
 
@@ -101,11 +102,8 @@ function saveBgImage(value, callback) {
 }
 
 function setBodyBgImage(safeUrl) {
-    var backgroundLayer = document.getElementById("background-layer");
-    backgroundLayer.style.backgroundImage = "";
-    if (safeUrl) {
-        backgroundLayer.style.backgroundImage = "url(" + JSON.stringify(safeUrl) + ")";
-    }
+    backgroundLayer.classList.remove("bg-disabled");
+    backgroundLayer.style.backgroundImage = safeUrl ? "url(" + JSON.stringify(safeUrl) + ")" : "";
 }
 
 // --- DOM Helpers ---
@@ -164,13 +162,17 @@ function applyBackground() {
     if (bgImageToggle) bgImageToggle.checked = enabled;
 
     if (!enabled) {
-        setBodyBgImage("");
+        backgroundLayer.classList.add("bg-disabled");
+        backgroundLayer.style.backgroundImage = "";
         return;
     }
 
+    // Remove disabled state immediately — CSS default image shows while async read runs
+    backgroundLayer.classList.remove("bg-disabled");
+    backgroundLayer.style.backgroundImage = "";
+
     getBgImage(function(image) {
         if (!image) {
-            setBodyBgImage(DEFAULT_BG_IMAGE);
             bgImageInput.value = "";
             return;
         }
@@ -179,7 +181,6 @@ function applyBackground() {
 
         if (!safeRemoteUrl) {
             saveBgImage("");
-            setBodyBgImage(DEFAULT_BG_IMAGE);
             bgImageInput.value = "";
             return;
         }
@@ -323,10 +324,12 @@ function createFavElement(fav, index) {
 function renderFavorites(favorites) {
     var favGrid = document.getElementById("favorites-grid");
     if (!favorites) favorites = loadFavorites();
-    favGrid.innerHTML = "";
+    var fragment = document.createDocumentFragment();
     favorites.forEach(function(fav, index) {
-        favGrid.appendChild(createFavElement(fav, index));
+        fragment.appendChild(createFavElement(fav, index));
     });
+    favGrid.innerHTML = "";
+    favGrid.appendChild(fragment);
 }
 
 function removeFavorite(index) {
