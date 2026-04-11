@@ -172,13 +172,16 @@ function applyBackground() {
     });
 }
 
+function brightnessScale(value) {
+    return Math.max(0.05, 1 + Number(value) / 100);
+}
+
 function applyBackgroundBrightness() {
     var raw = localStorage.getItem(STORAGE_KEYS.BG_BRIGHTNESS);
     var parsed = Number(raw);
     var brightnessValue = Number.isFinite(parsed) ? Math.max(-100, Math.min(100, parsed)) : 0;
-    var brightnessScale = Math.max(0.05, 1 + brightnessValue / 100);
     document.getElementById("bg-brightness").value = String(brightnessValue);
-    document.documentElement.style.setProperty("--bg-image-brightness", String(brightnessScale));
+    document.documentElement.style.setProperty("--bg-image-brightness", String(brightnessScale(brightnessValue)));
 }
 
 function applyBgImageCapSetting() {

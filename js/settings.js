@@ -275,7 +275,7 @@ clockYInput.addEventListener("input", function() {
 // Background Controls
 bgBrightnessInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.BG_BRIGHTNESS, this.value);
-    document.documentElement.style.setProperty("--bg-image-brightness", String(Math.max(0.05, 1 + Number(this.value) / 100)));
+    document.documentElement.style.setProperty("--bg-image-brightness", String(brightnessScale(this.value)));
 });
 
 bgImageCapSelect.addEventListener("change", function() {
