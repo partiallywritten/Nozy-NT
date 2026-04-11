@@ -339,6 +339,12 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.settings-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .settings-header h2 {
   font-size: 1.02rem;
   font-weight: 500;
@@ -707,6 +713,10 @@ input[type="range"] {
 }
 
 .browse-themes-btn.hidden {
+  display: none;
+}
+
+.export-theme-btn.hidden {
   display: none;
 }
 

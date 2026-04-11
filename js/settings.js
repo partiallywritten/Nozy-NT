@@ -46,6 +46,7 @@ var faviconFileInput = document.getElementById("favicon-file");
 var applyFaviconBtn = document.getElementById("apply-favicon");
 var clearFaviconBtn = document.getElementById("clear-favicon");
 var restoreDefaultsBtn = document.getElementById("restore-defaults");
+var exportThemeBtn = document.getElementById("export-theme-btn");
 
 // --- Settings-only Utilities ---
 
@@ -136,7 +137,7 @@ function applyLocalBackgroundFile(file) {
     readImageFile(file, bgImageError, function(dataUrl) {
         bgImageInput.value = "";
         bgImageInput.removeAttribute("aria-invalid");
-        localStorage.setItem(STORAGE_KEYS.THEME, "user");
+        markUserTheme();
         var dims = getBgImageCapDimensions();
         if (!dims) {
             setBodyBgImage(dataUrl);
@@ -155,17 +156,57 @@ function applyLocalFaviconFile(file) {
         faviconUrlInput.value = "";
         faviconUrlInput.removeAttribute("aria-invalid");
         localStorage.setItem(STORAGE_KEYS.FAVICON, dataUrl);
-        localStorage.setItem(STORAGE_KEYS.THEME, "user");
+        markUserTheme();
         setFavicon(dataUrl);
     });
 }
 
 // --- Panel & Modal ---
 
+function syncExportBtnVisibility() {
+    var isUser = localStorage.getItem(STORAGE_KEYS.THEME) === "user";
+    exportThemeBtn.classList.toggle("hidden", !isUser);
+}
+
+function markUserTheme() {
+    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    syncExportBtnVisibility();
+}
+
+function exportUserTheme() {
+    var theme = {
+        id: "user",
+        name: "User",
+        bgColor: localStorage.getItem(STORAGE_KEYS.BG_COLOR) || DEFAULTS.BG_COLOR,
+        highlightColor: localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_COLOR) || DEFAULTS.HIGHLIGHT_COLOR,
+        textColor: localStorage.getItem(STORAGE_KEYS.TEXT_COLOR) || DEFAULTS.TEXT_COLOR,
+        clockSize: localStorage.getItem(STORAGE_KEYS.CLOCK_SIZE) || DEFAULTS.CLOCK_SIZE,
+        clockX: localStorage.getItem(STORAGE_KEYS.CLOCK_X) || DEFAULTS.CLOCK_X,
+        clockY: localStorage.getItem(STORAGE_KEYS.CLOCK_Y) || DEFAULTS.CLOCK_Y,
+        fontUrl: localStorage.getItem(STORAGE_KEYS.FONT_URL) || "",
+        fontFamily: localStorage.getItem(STORAGE_KEYS.FONT_FAMILY) || DEFAULTS.FONT_FAMILY,
+        bgBrightness: localStorage.getItem(STORAGE_KEYS.BG_BRIGHTNESS) || "0",
+        bgImageEnabled: localStorage.getItem(STORAGE_KEYS.BG_IMAGE_ENABLED) !== "false",
+        tabName: localStorage.getItem(STORAGE_KEYS.TAB_NAME) || "",
+        favicon: localStorage.getItem(STORAGE_KEYS.FAVICON) || ""
+    };
+    var json = JSON.stringify(theme, null, 2);
+    var blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "user-theme.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 function openSettings() {
     settingsPanel.classList.add("open");
     settingsPanel.setAttribute("aria-hidden", "false");
     applyThemesEnabledSetting();
+    syncExportBtnVisibility();
 }
 
 function closeSettingsPanel() {
@@ -227,6 +268,7 @@ settingsBtn.addEventListener("click", openSettings);
 closeSettingsBtn.addEventListener("click", closeSettingsPanel);
 addBtn.addEventListener("click", openModal);
 modalCancel.addEventListener("click", closeModal);
+exportThemeBtn.addEventListener("click", exportUserTheme);
 
 modalOverlay.addEventListener("click", function(e) {
     if (e.target === modalOverlay) closeModal();
@@ -259,21 +301,21 @@ settingsSections.forEach(function(section) {
 // Color Inputs
 bgColorInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.BG_COLOR, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     docStyle.setProperty("--bg-color", this.value);
     document.body.style.backgroundColor = this.value;
 });
 
 highlightColorInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.HIGHLIGHT_COLOR, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     docStyle.setProperty("--accent", this.value);
     docStyle.setProperty("--accent-hover", hexToRgba(this.value, 0.85));
 });
 
 textColorInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.TEXT_COLOR, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     docStyle.setProperty("--text", this.value);
     docStyle.setProperty("--text-muted", hexToRgba(this.value, 0.74));
 });
@@ -281,36 +323,36 @@ textColorInput.addEventListener("input", function() {
 // Clock Inputs
 clockSizeInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.CLOCK_SIZE, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     docStyle.setProperty("--clock-size", `${this.value}rem`);
 });
 clockXInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.CLOCK_X, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     docStyle.setProperty("--clock-x", `${this.value}px`);
 });
 clockYInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.CLOCK_Y, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     docStyle.setProperty("--clock-y", `${this.value}px`);
 });
 
 // Background Controls
 bgImageToggle.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.BG_IMAGE_ENABLED, this.checked ? "true" : "false");
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     applyBackground();
 });
 
 bgBrightnessInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.BG_BRIGHTNESS, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     docStyle.setProperty("--bg-image-brightness", String(brightnessScale(this.value)));
 });
 
 bgImageCapSelect.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.BG_IMAGE_CAP, this.value);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
 });
 
 bgFileInput.addEventListener("change", function() {
@@ -324,14 +366,14 @@ applyBgBtn.addEventListener("click", function() {
         return;
     }
     processUrlInput(bgImageInput, bgImageError, "Please enter a valid http or https image URL.", function(safeUrl) {
-        localStorage.setItem(STORAGE_KEYS.THEME, "user");
+        markUserTheme();
         saveBgImage(safeUrl);
         setBodyBgImage(safeUrl);
     });
 });
 
 clearBgBtn.addEventListener("click", function() {
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     saveBgImage("");
     bgImageInput.value = "";
     bgFileInput.value = "";
@@ -349,7 +391,7 @@ applyFontBtn.addEventListener("click", function() {
     if (!rawUrl) {
         localStorage.removeItem(STORAGE_KEYS.FONT_URL);
         localStorage.setItem(STORAGE_KEYS.FONT_FAMILY, fontFamily);
-        localStorage.setItem(STORAGE_KEYS.THEME, "user");
+        markUserTheme();
         applyCustomFont("", fontFamily);
         return;
     }
@@ -357,7 +399,7 @@ applyFontBtn.addEventListener("click", function() {
     processUrlInput(fontUrlInput, fontUrlError, "Please enter a valid http or https stylesheet URL.", function(safeUrl) {
         localStorage.setItem(STORAGE_KEYS.FONT_URL, safeUrl);
         localStorage.setItem(STORAGE_KEYS.FONT_FAMILY, fontFamily);
-        localStorage.setItem(STORAGE_KEYS.THEME, "user");
+        markUserTheme();
         applyCustomFont(safeUrl, fontFamily);
     });
 });
@@ -367,7 +409,7 @@ applyTabNameBtn.addEventListener("click", function() {
     var name = tabNameInput.value.trim();
     if (name) localStorage.setItem(STORAGE_KEYS.TAB_NAME, name);
     else localStorage.removeItem(STORAGE_KEYS.TAB_NAME);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     document.title = name || "New Tab";
 });
 
@@ -383,14 +425,14 @@ applyFaviconBtn.addEventListener("click", function() {
     }
     processUrlInput(faviconUrlInput, faviconUrlError, "Please enter a valid http or https image URL.", function(safeUrl) {
         localStorage.setItem(STORAGE_KEYS.FAVICON, safeUrl);
-        localStorage.setItem(STORAGE_KEYS.THEME, "user");
+        markUserTheme();
         setFavicon(safeUrl);
     });
 });
 
 clearFaviconBtn.addEventListener("click", function() {
     localStorage.removeItem(STORAGE_KEYS.FAVICON);
-    localStorage.setItem(STORAGE_KEYS.THEME, "user");
+    markUserTheme();
     faviconUrlInput.value = "";
     faviconFileInput.value = "";
     faviconUrlInput.removeAttribute("aria-invalid");
