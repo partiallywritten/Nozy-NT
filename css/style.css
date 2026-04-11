@@ -37,12 +37,16 @@ body {
   height: 100%;
 }
 
+html {
+  overflow: hidden;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-color);
   color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
   isolation: isolate;
 }
@@ -76,9 +80,13 @@ body {
 
 /* ── Clock ────────────────────────────────────────────────────── */
 .clock-section {
+  position: fixed;
+  left: clamp(5dvw, calc(50dvw + var(--clock-x)), 95dvw);
+  top: clamp(5dvh, calc(50dvh + var(--clock-y)), 95dvh);
+  transform: translate(-50%, -50%);
   text-align: center;
-  transform: translate(var(--clock-x), var(--clock-y));
-  transition: transform var(--transition);
+  z-index: 1;
+  transition: left var(--transition), top var(--transition);
 }
 
 .time {
@@ -101,11 +109,15 @@ body {
 
 /* ── Search bar ───────────────────────────────────────────────── */
 .search-section {
-  width: 100%;
+  position: fixed;
+  left: clamp(5dvw, calc(50dvw + var(--search-x)), 95dvw);
+  top: clamp(5dvh, calc(50dvh + var(--search-y)), 95dvh);
+  transform: translate(-50%, -50%);
+  width: min(var(--search-width), 90dvw);
   display: flex;
   justify-content: center;
-  transform: translate(var(--search-x), var(--search-y));
-  transition: transform var(--transition);
+  z-index: 1;
+  transition: left var(--transition), top var(--transition);
 }
 
 .search-form {
@@ -180,6 +192,10 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0.95rem;
+}
+
+.favorites-section.hidden {
+  display: none;
 }
 
 .favorites-grid {

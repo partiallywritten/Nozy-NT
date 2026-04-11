@@ -17,10 +17,12 @@ var DEFAULTS = {
     FAVICON: "",
     BG_IMAGE_CAP: "1080p",
     SEARCH_URL: "https://www.google.com/search?q={query}",
+    FAVORITES_ENABLED: "true",
 };
 
 var STORAGE_KEYS = {
     FAVORITES: "ch_favorites",
+    FAVORITES_ENABLED: "ch_favorites_enabled",
     BG_COLOR: "ch_bg_color",
     SURFACE_COLOR: "ch_surface_color",
     BG_IMAGE: "ch_bg_image",
@@ -292,6 +294,12 @@ function applyGeneralSettings() {
         setFavicon("");
         faviconUrlEl.value = "";
     }
+
+    var favoritesEnabled = localStorage.getItem(STORAGE_KEYS.FAVORITES_ENABLED) !== "false";
+    var favoritesToggle = document.getElementById("favorites-toggle");
+    if (favoritesToggle) favoritesToggle.checked = favoritesEnabled;
+    var favSection = document.querySelector(".favorites-section");
+    if (favSection) favSection.classList.toggle("hidden", !favoritesEnabled);
 }
 
 function applySearchSettings() {

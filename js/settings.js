@@ -644,6 +644,12 @@ applyTabNameBtn.addEventListener("click", function() {
     document.title = name || "New Tab";
 });
 
+document.getElementById("favorites-toggle").addEventListener("change", function() {
+    localStorage.setItem(STORAGE_KEYS.FAVORITES_ENABLED, this.checked ? "true" : "false");
+    var favSection = document.querySelector(".favorites-section");
+    if (favSection) favSection.classList.toggle("hidden", !this.checked);
+});
+
 faviconFileInput.addEventListener("change", function() {
     applyLocalFaviconFile(faviconFileInput.files && faviconFileInput.files[0]);
 });
