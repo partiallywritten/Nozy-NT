@@ -164,9 +164,13 @@ function applyThemeSettings() {
     docStyle.setProperty("--text-muted", hexToRgba(textColor, 0.74));
 
     document.getElementById("bg-color").value = bgColor;
+    document.getElementById("bg-color-hex").value = bgColor.toUpperCase();
     document.getElementById("surface-color").value = surfaceColor;
+    document.getElementById("surface-color-hex").value = surfaceColor.toUpperCase();
     document.getElementById("highlight-color").value = highlightColor;
+    document.getElementById("highlight-color-hex").value = highlightColor.toUpperCase();
     document.getElementById("text-color").value = textColor;
+    document.getElementById("text-color-hex").value = textColor.toUpperCase();
     document.body.style.backgroundColor = bgColor;
 }
 

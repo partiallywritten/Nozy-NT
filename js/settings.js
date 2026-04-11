@@ -8,9 +8,13 @@ var closeSettingsBtn = document.getElementById("close-settings");
 var settingsSections = settingsPanel.querySelectorAll("details.settings-section");
 
 var bgColorInput = document.getElementById("bg-color");
+var bgColorHexInput = document.getElementById("bg-color-hex");
 var surfaceColorInput = document.getElementById("surface-color");
+var surfaceColorHexInput = document.getElementById("surface-color-hex");
 var highlightColorInput = document.getElementById("highlight-color");
+var highlightColorHexInput = document.getElementById("highlight-color-hex");
 var textColorInput = document.getElementById("text-color");
+var textColorHexInput = document.getElementById("text-color-hex");
 
 var bgImageInput = document.getElementById("bg-image");
 var bgFileInput = document.getElementById("bg-file");
@@ -444,34 +448,93 @@ settingsSections.forEach(function(section) {
     });
 });
 
+// --- Color Picker Utilities ---
+
+var HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
+function syncHexFromPicker(pickerEl, hexEl) {
+    hexEl.value = pickerEl.value.toUpperCase();
+    hexEl.removeAttribute("aria-invalid");
+}
+
+function syncPickerFromHex(hexEl, pickerEl, onValid) {
+    var raw = hexEl.value.trim();
+    if (!raw.startsWith("#")) raw = "#" + raw;
+    if (HEX_RE.test(raw)) {
+        hexEl.value = raw.toUpperCase();
+        hexEl.removeAttribute("aria-invalid");
+        pickerEl.value = raw.toLowerCase();
+        onValid(raw.toLowerCase());
+    } else {
+        hexEl.setAttribute("aria-invalid", "true");
+    }
+}
+
 // Color Inputs
 bgColorInput.addEventListener("input", function() {
+    syncHexFromPicker(this, bgColorHexInput);
     localStorage.setItem(STORAGE_KEYS.BG_COLOR, this.value);
     markUserTheme();
     docStyle.setProperty("--bg-color", this.value);
     document.body.style.backgroundColor = this.value;
 });
+bgColorHexInput.addEventListener("input", function() {
+    syncPickerFromHex(this, bgColorInput, function(hex) {
+        localStorage.setItem(STORAGE_KEYS.BG_COLOR, hex);
+        markUserTheme();
+        docStyle.setProperty("--bg-color", hex);
+        document.body.style.backgroundColor = hex;
+    });
+});
 
 surfaceColorInput.addEventListener("input", function() {
+    syncHexFromPicker(this, surfaceColorHexInput);
     localStorage.setItem(STORAGE_KEYS.SURFACE_COLOR, this.value);
     markUserTheme();
     docStyle.setProperty("--surface", hexToRgba(this.value, 0.52));
     docStyle.setProperty("--panel-bg", hexToRgba(this.value, 0.95));
 });
+surfaceColorHexInput.addEventListener("input", function() {
+    syncPickerFromHex(this, surfaceColorInput, function(hex) {
+        localStorage.setItem(STORAGE_KEYS.SURFACE_COLOR, hex);
+        markUserTheme();
+        docStyle.setProperty("--surface", hexToRgba(hex, 0.52));
+        docStyle.setProperty("--panel-bg", hexToRgba(hex, 0.95));
+    });
+});
 
 highlightColorInput.addEventListener("input", function() {
+    syncHexFromPicker(this, highlightColorHexInput);
     localStorage.setItem(STORAGE_KEYS.HIGHLIGHT_COLOR, this.value);
     markUserTheme();
     docStyle.setProperty("--accent", this.value);
     docStyle.setProperty("--accent-hover", hexToRgba(this.value, 0.85));
     docStyle.setProperty("--surface-hover", hexToRgba(this.value, 0.16));
 });
+highlightColorHexInput.addEventListener("input", function() {
+    syncPickerFromHex(this, highlightColorInput, function(hex) {
+        localStorage.setItem(STORAGE_KEYS.HIGHLIGHT_COLOR, hex);
+        markUserTheme();
+        docStyle.setProperty("--accent", hex);
+        docStyle.setProperty("--accent-hover", hexToRgba(hex, 0.85));
+        docStyle.setProperty("--surface-hover", hexToRgba(hex, 0.16));
+    });
+});
 
 textColorInput.addEventListener("input", function() {
+    syncHexFromPicker(this, textColorHexInput);
     localStorage.setItem(STORAGE_KEYS.TEXT_COLOR, this.value);
     markUserTheme();
     docStyle.setProperty("--text", this.value);
     docStyle.setProperty("--text-muted", hexToRgba(this.value, 0.74));
+});
+textColorHexInput.addEventListener("input", function() {
+    syncPickerFromHex(this, textColorInput, function(hex) {
+        localStorage.setItem(STORAGE_KEYS.TEXT_COLOR, hex);
+        markUserTheme();
+        docStyle.setProperty("--text", hex);
+        docStyle.setProperty("--text-muted", hexToRgba(hex, 0.74));
+    });
 });
 
 // Clock Inputs
