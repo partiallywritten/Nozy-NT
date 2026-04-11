@@ -18,6 +18,7 @@ var STORAGE_KEYS = {
     FAVORITES: "ch_favorites",
     BG_COLOR: "ch_bg_color",
     BG_IMAGE: "ch_bg_image",
+    BG_IMAGE_ENABLED: "ch_bg_image_enabled",
     BG_BRIGHTNESS: "ch_bg_brightness",
     BG_IMAGE_CAP: "ch_bg_image_cap",
     HIGHLIGHT_COLOR: "ch_highlight_color",
@@ -33,6 +34,7 @@ var STORAGE_KEYS = {
 
 // --- Cached DOM References ---
 var docStyle = document.documentElement.style;
+var backgroundLayer = document.getElementById("background-layer");
 
 // --- Core Utilities ---
 
@@ -64,6 +66,8 @@ function sanitizeHttpUrl(raw) {
 }
 
 // --- Background Helpers ---
+
+var DEFAULT_BG_IMAGE = "img/default.jpg";
 
 function getBgImage(callback) {
     chrome.storage.local.get([STORAGE_KEYS.BG_IMAGE], function(result) {
@@ -98,11 +102,8 @@ function saveBgImage(value, callback) {
 }
 
 function setBodyBgImage(safeUrl) {
-    var backgroundLayer = document.getElementById("background-layer");
-    backgroundLayer.style.backgroundImage = "";
-    if (safeUrl) {
-        backgroundLayer.style.backgroundImage = "url(" + JSON.stringify(safeUrl) + ")";
-    }
+    backgroundLayer.classList.remove("bg-disabled");
+    backgroundLayer.style.backgroundImage = safeUrl ? "url(" + JSON.stringify(safeUrl) + ")" : "";
 }
 
 // --- DOM Helpers ---
@@ -155,10 +156,25 @@ function applyThemeSettings() {
 
 function applyBackground() {
     var bgImageInput = document.getElementById("bg-image");
+    var bgImageToggle = document.getElementById("bg-image-toggle");
+    var enabled = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_ENABLED) !== "false";
+
+    if (bgImageToggle) bgImageToggle.checked = enabled;
+
+    if (!enabled) {
+        backgroundLayer.classList.add("bg-disabled");
+        backgroundLayer.style.backgroundImage = "";
+        return;
+    }
+
+    // Clear any previous inline style so the CSS default image shows while the async read runs
+    backgroundLayer.classList.remove("bg-disabled");
+    backgroundLayer.style.backgroundImage = "";
+
     getBgImage(function(image) {
         if (!image) {
-            setBodyBgImage("");
             bgImageInput.value = "";
+            // No custom image — CSS default already showing, nothing more to do
             return;
         }
         var isLocalDataImage = image.startsWith("data:image/");
@@ -166,7 +182,6 @@ function applyBackground() {
 
         if (!safeRemoteUrl) {
             saveBgImage("");
-            setBodyBgImage("");
             bgImageInput.value = "";
             return;
         }
@@ -310,10 +325,12 @@ function createFavElement(fav, index) {
 function renderFavorites(favorites) {
     var favGrid = document.getElementById("favorites-grid");
     if (!favorites) favorites = loadFavorites();
-    favGrid.innerHTML = "";
+    var fragment = document.createDocumentFragment();
     favorites.forEach(function(fav, index) {
-        favGrid.appendChild(createFavElement(fav, index));
+        fragment.appendChild(createFavElement(fav, index));
     });
+    favGrid.innerHTML = "";
+    favGrid.appendChild(fragment);
 }
 
 function removeFavorite(index) {

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>New Tab</title>
     <link rel="stylesheet" href="css/style.min.css" />
+    <link rel="preload" href="img/default.jpg" as="image" />
   </head>
   <body>
     <div id="background-layer" class="background-layer" aria-hidden="true"></div>
@@ -102,6 +103,15 @@
         <details class="settings-section">
           <summary>Background</summary>
           <div class="settings-section-content">
+            <div class="setting-group">
+              <div class="toggle-row">
+                <span class="setting-group-label">Enable Background Image</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="bg-image-toggle" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
             <div class="setting-group">
               <label for="bg-image">Background Image URL</label>
               <div class="input-row">
