@@ -43,6 +43,9 @@ function applyThemePreset(theme, themeId) {
     set(STORAGE_KEYS.SEARCH_WIDTH, theme.searchWidth);
     set(STORAGE_KEYS.SEARCH_X, theme.searchX);
     set(STORAGE_KEYS.SEARCH_Y, theme.searchY);
+    set(STORAGE_KEYS.FAV_X, theme.favX);
+    set(STORAGE_KEYS.FAV_Y, theme.favY);
+    set(STORAGE_KEYS.FAV_LAYOUT, theme.favLayout);
     set(STORAGE_KEYS.FONT_URL, theme.fontUrl);
     set(STORAGE_KEYS.FONT_FAMILY, theme.fontFamily);
     set(STORAGE_KEYS.BG_BRIGHTNESS, theme.bgBrightness);
@@ -67,6 +70,7 @@ function applyThemePreset(theme, themeId) {
     applySearchBarSettings();
     applyFontSettings();
     applyGeneralSettings();
+    applyFavoritesSettings();
 
     // Fetch the theme background image, process through canvas (respecting cap), save as data URL
     if (!bgEnabled) {

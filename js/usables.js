@@ -267,6 +267,11 @@ function applySearchBarSettings() {
     docStyle.setProperty("--search-width", `${searchWidth}px`);
     docStyle.setProperty("--search-x", `${searchX}dvw`);
     docStyle.setProperty("--search-y", `${searchY}dvh`);
+
+    var searchUrlInput = document.getElementById("search-url");
+    if (searchUrlInput) {
+        searchUrlInput.value = localStorage.getItem(STORAGE_KEYS.SEARCH_URL) || "";
+    }
 }
 
 function applyFontSettings() {
@@ -329,13 +334,6 @@ function applyFavoritesSettings() {
 
     docStyle.setProperty("--fav-x", `${favX}dvw`);
     docStyle.setProperty("--fav-y", `${favY}dvh`);
-}
-
-function applySearchSettings() {
-    var searchUrlInput = document.getElementById("search-url");
-    if (searchUrlInput) {
-        searchUrlInput.value = localStorage.getItem(STORAGE_KEYS.SEARCH_URL) || "";
-    }
 }
 
 // --- Favorites ---
