@@ -30,5 +30,6 @@ applyClockSettings();
 applySearchBarSettings();
 applyFontSettings();
 applyGeneralSettings();
+applyFavoritesSettings();
 applySearchSettings();
 renderFavorites();

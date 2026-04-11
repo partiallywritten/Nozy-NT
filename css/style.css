@@ -29,6 +29,8 @@
   --search-width: 560px;
   --search-x: 0dvw;
   --search-y: 0dvh;
+  --fav-x: 0dvw;
+  --fav-y: 0dvh;
   --font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
@@ -188,14 +190,26 @@ body {
 
 /* ── Favorites ────────────────────────────────────────────────── */
 .favorites-section {
+  position: fixed;
+  left: clamp(5dvw, calc(50dvw + var(--fav-x)), 95dvw);
+  top: clamp(5dvh, calc(50dvh + var(--fav-y)), 95dvh);
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.95rem;
+  z-index: 1;
+  transition: left var(--transition), top var(--transition);
 }
 
 .favorites-section.hidden {
   display: none;
+}
+
+.favorites-section.layout-column .favorites-grid {
+  flex-direction: column;
+  align-items: center;
+  max-width: 200px;
 }
 
 .favorites-grid {

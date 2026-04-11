@@ -18,11 +18,17 @@ var DEFAULTS = {
     BG_IMAGE_CAP: "1080p",
     SEARCH_URL: "https://www.google.com/search?q={query}",
     FAVORITES_ENABLED: "true",
+    FAV_X: "0",
+    FAV_Y: "0",
+    FAV_LAYOUT: "row",
 };
 
 var STORAGE_KEYS = {
     FAVORITES: "ch_favorites",
     FAVORITES_ENABLED: "ch_favorites_enabled",
+    FAV_X: "ch_fav_x",
+    FAV_Y: "ch_fav_y",
+    FAV_LAYOUT: "ch_fav_layout",
     BG_COLOR: "ch_bg_color",
     SURFACE_COLOR: "ch_surface_color",
     BG_IMAGE: "ch_bg_image",
@@ -294,12 +300,35 @@ function applyGeneralSettings() {
         setFavicon("");
         faviconUrlEl.value = "";
     }
+}
 
+function applyFavoritesSettings() {
     var favoritesEnabled = localStorage.getItem(STORAGE_KEYS.FAVORITES_ENABLED) !== "false";
+    var favX = localStorage.getItem(STORAGE_KEYS.FAV_X) || DEFAULTS.FAV_X;
+    var favY = localStorage.getItem(STORAGE_KEYS.FAV_Y) || DEFAULTS.FAV_Y;
+    var favLayout = localStorage.getItem(STORAGE_KEYS.FAV_LAYOUT) || DEFAULTS.FAV_LAYOUT;
+
+    if (Math.abs(Number(favX)) > 40) favX = DEFAULTS.FAV_X;
+    if (Math.abs(Number(favY)) > 40) favY = DEFAULTS.FAV_Y;
+
     var favoritesToggle = document.getElementById("favorites-toggle");
-    if (favoritesToggle) favoritesToggle.checked = favoritesEnabled;
+    var favXInput = document.getElementById("fav-x");
+    var favYInput = document.getElementById("fav-y");
+    var favLayoutToggle = document.getElementById("fav-layout-toggle");
     var favSection = document.querySelector(".favorites-section");
-    if (favSection) favSection.classList.toggle("hidden", !favoritesEnabled);
+
+    if (favoritesToggle) favoritesToggle.checked = favoritesEnabled;
+    if (favXInput) favXInput.value = favX;
+    if (favYInput) favYInput.value = favY;
+    if (favLayoutToggle) favLayoutToggle.checked = (favLayout === "column");
+
+    if (favSection) {
+        favSection.classList.toggle("hidden", !favoritesEnabled);
+        favSection.classList.toggle("layout-column", favLayout === "column");
+    }
+
+    docStyle.setProperty("--fav-x", `${favX}dvw`);
+    docStyle.setProperty("--fav-y", `${favY}dvh`);
 }
 
 function applySearchSettings() {

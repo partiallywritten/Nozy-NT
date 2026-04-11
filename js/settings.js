@@ -33,6 +33,9 @@ var searchWidthInput = document.getElementById("search-width");
 var searchXInput = document.getElementById("search-x");
 var searchYInput = document.getElementById("search-y");
 
+var favXInput = document.getElementById("fav-x");
+var favYInput = document.getElementById("fav-y");
+
 var fontUrlInput = document.getElementById("font-url");
 var fontUrlError = document.getElementById("font-url-error");
 var fontFamilyInput = document.getElementById("font-family");
@@ -648,6 +651,23 @@ document.getElementById("favorites-toggle").addEventListener("change", function(
     localStorage.setItem(STORAGE_KEYS.FAVORITES_ENABLED, this.checked ? "true" : "false");
     var favSection = document.querySelector(".favorites-section");
     if (favSection) favSection.classList.toggle("hidden", !this.checked);
+});
+
+document.getElementById("fav-layout-toggle").addEventListener("change", function() {
+    var layout = this.checked ? "column" : "row";
+    localStorage.setItem(STORAGE_KEYS.FAV_LAYOUT, layout);
+    var favSection = document.querySelector(".favorites-section");
+    if (favSection) favSection.classList.toggle("layout-column", this.checked);
+});
+
+favXInput.addEventListener("input", function() {
+    localStorage.setItem(STORAGE_KEYS.FAV_X, this.value);
+    docStyle.setProperty("--fav-x", `${this.value}dvw`);
+});
+
+favYInput.addEventListener("input", function() {
+    localStorage.setItem(STORAGE_KEYS.FAV_Y, this.value);
+    docStyle.setProperty("--fav-y", `${this.value}dvh`);
 });
 
 faviconFileInput.addEventListener("change", function() {
