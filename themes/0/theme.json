@@ -3,13 +3,13 @@
   "bgColor": "#002b4e",
   "highlightColor": "#d4b5c7",
   "textColor": "#b6a8c8",
-  "clockSize": "8",
+  "clockSize": "4",
   "clockX": "0",
   "clockY": "0",
   "fontUrl": "",
   "fontFamily": "\"JetBrains Mono\", \"Fira Code\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
-  "bgBrightness": "0",
+  "bgBrightness": "-66",
   "bgImageEnabled": true,
-  "tabName": "",
+  "tabName": "New Tab~",
   "favicon": ""
 }
