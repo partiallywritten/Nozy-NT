@@ -1,0 +1,15 @@
+{
+  "name": "Knight in Shining Armor",
+  "bgColor": "#4754a1",
+  "highlightColor": "#73bcfb",
+  "textColor": "#fde48b",
+  "clockSize": "4.2",
+  "clockX": "0",
+  "clockY": "0",
+  "fontUrl": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap",
+  "fontFamily": "\"Cinzel Decorative\", serif",
+  "bgBrightness": "-66",
+  "bgImageEnabled": true,
+  "tabName": "To Home!",
+  "favicon": ""
+}
