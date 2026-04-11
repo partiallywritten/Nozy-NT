@@ -1,0 +1,16 @@
+{
+  "name": "Changli",
+  "bgColor": "#e7bbaf",
+  "surfaceColor": "#562a3b",
+  "highlightColor": "#e55648",
+  "textColor": "#fdc78b",
+  "clockSize": "4",
+  "clockX": "0",
+  "clockY": "0",
+  "fontUrl": "https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng",
+  "fontFamily": "\"Ma Shan Zheng\", cursive",
+  "bgBrightness": "-59",
+  "bgImageEnabled": true,
+  "tabName": "Entertain me!",
+  "favicon": ""
+}
