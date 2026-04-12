@@ -113,6 +113,7 @@ function _whenBgDbReady(fn) {
 
 function _dataUrlToBlob(dataUrl) {
     var arr = dataUrl.split(",");
+    if (arr.length < 2 || !arr[1]) return new Blob([], { type: "image/jpeg" });
     var mimeMatch = arr[0].match(/:(.*?);/);
     var mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
     var bstr = atob(arr[1]);
@@ -180,6 +181,7 @@ function saveBgImage(value, callback) {
     localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
     var cb = callback || function() {};
     if (!value) {
+        if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
         _clearBgIdb();
         chrome.storage.local.remove(STORAGE_KEYS.BG_IMAGE, cb);
         return;
@@ -198,6 +200,8 @@ function saveBgImage(value, callback) {
             chrome.storage.local.set(obj, cb);
         };
     } else {
+        // Switching to chrome.storage.local — revoke any stale ObjectURL and clear IDB
+        if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
         _clearBgIdb();
         var obj = {};
         obj[STORAGE_KEYS.BG_IMAGE] = value;
