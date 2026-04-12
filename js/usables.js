@@ -44,6 +44,8 @@ var STORAGE_KEYS = {
     THEMES_ENABLED: "ch_themes_enabled",
     CUSTOM_THEMES_ENABLED: "ch_custom_themes_enabled",
     SEARCH_URL: "ch_search_url",
+    CLOCK_HIDDEN: "ch_clock_hidden",
+    DATE_HIDDEN: "ch_date_hidden",
 };
 
 // --- Cached DOM References ---
@@ -239,6 +241,21 @@ function applyClockSettings() {
     docStyle.setProperty("--clock-size", `${clockSize}rem`);
     docStyle.setProperty("--clock-x", `${clockX}px`);
     docStyle.setProperty("--clock-y", `${clockY}px`);
+}
+
+function applyClockVisibility() {
+    var clockHidden = localStorage.getItem(STORAGE_KEYS.CLOCK_HIDDEN) === "true";
+    var dateHidden = localStorage.getItem(STORAGE_KEYS.DATE_HIDDEN) === "true";
+    var clockToggle = document.getElementById("clock-hidden-toggle");
+    var dateToggle = document.getElementById("date-hidden-toggle");
+
+    if (clockToggle) clockToggle.checked = clockHidden;
+    if (dateToggle) dateToggle.checked = dateHidden;
+
+    var timeEl = document.getElementById("time");
+    var dateEl = document.getElementById("date");
+    if (timeEl) timeEl.classList.toggle("hidden", clockHidden);
+    if (dateEl) dateEl.classList.toggle("hidden", dateHidden);
 }
 
 function applySearchBarSettings() {

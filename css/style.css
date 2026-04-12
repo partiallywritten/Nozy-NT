@@ -186,6 +186,11 @@ body {
   display: none;
 }
 
+#time.hidden,
+#date.hidden {
+  display: none;
+}
+
 .favorites-grid {
   display: flex;
   flex-wrap: wrap;
