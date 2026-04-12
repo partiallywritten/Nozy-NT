@@ -156,6 +156,10 @@ An empty string (`""`) for a string field clears/resets that setting.
   "bgBrightness": "0",
   "bgImageEnabled": true,
 
+  "favoritesEnabled": true,
+  "clockHidden": false,
+  "dateHidden": false,
+
   "tabName": "",
   "favicon": ""
 }
@@ -180,6 +184,9 @@ An empty string (`""`) for a string field clears/resets that setting.
 | `fontFamily`     | CSS font stack   | monospace stack | CSS `font-family` value applied to the whole page                    |
 | `bgBrightness`   | numeric string   | `"0"`     | Background brightness adjustment (range: `-100`–`100`)                      |
 | `bgImageEnabled` | boolean          | `true`    | Whether the background image is shown (`true`) or hidden (`false`)          |
+| `favoritesEnabled` | boolean        | `true`    | Whether the favorites section is shown (`true`) or hidden (`false`)         |
+| `clockHidden`    | boolean          | `false`   | Whether the clock is hidden (`true`) or visible (`false`)                   |
+| `dateHidden`     | boolean          | `false`   | Whether the date is hidden (`true`) or visible (`false`)                    |
 | `tabName`        | string           | `""`      | Browser tab title. `""` = shows `"New Tab"`                                 |
 | `favicon`        | URL string       | `""`      | URL of a custom favicon image. `""` = browser default                       |
 

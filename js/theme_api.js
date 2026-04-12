@@ -60,6 +60,18 @@ function applyThemePreset(theme, themeId) {
         bgEnabled = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_ENABLED) !== "false";
     }
 
+    if (theme.favoritesEnabled !== null && theme.favoritesEnabled !== undefined) {
+        localStorage.setItem(STORAGE_KEYS.FAVORITES_ENABLED, theme.favoritesEnabled ? "true" : "false");
+    }
+
+    if (theme.clockHidden !== null && theme.clockHidden !== undefined) {
+        localStorage.setItem(STORAGE_KEYS.CLOCK_HIDDEN, theme.clockHidden ? "true" : "false");
+    }
+
+    if (theme.dateHidden !== null && theme.dateHidden !== undefined) {
+        localStorage.setItem(STORAGE_KEYS.DATE_HIDDEN, theme.dateHidden ? "true" : "false");
+    }
+
     // Store active theme ID
     localStorage.setItem(STORAGE_KEYS.THEME, String(themeId));
 
@@ -68,9 +80,11 @@ function applyThemePreset(theme, themeId) {
     applyBackgroundBrightness();
     applyBgImageCapSetting();
     applyClockSettings();
+    applyClockVisibility();
     applySearchBarSettings();
     applyFontSettings();
     applyGeneralSettings();
+    applyFavoritesEnabled();
 
     // Fetch the theme background image, process through canvas (respecting cap), save as data URL
     if (!bgEnabled) {
