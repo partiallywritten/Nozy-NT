@@ -64,7 +64,7 @@ var settingsBranding = document.getElementById("settings-branding");
 
 // --- Branding ---
 const version = chrome.runtime.getManifest().version ?? "unknown";
-settingsBranding.textContent = "NozyNT (v" + version + ")";
+settingsBranding.textContent = "Nozy-NT (v" + version + ")";
 
 var searchForm = document.getElementById("search-form");
 var searchInput = document.getElementById("search-input");
