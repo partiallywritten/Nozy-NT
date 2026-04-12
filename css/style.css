@@ -35,6 +35,7 @@
 html,
 body {
   height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -42,7 +43,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
   isolation: isolate;
 }
@@ -183,6 +184,11 @@ body {
 }
 
 .favorites-section.hidden {
+  display: none;
+}
+
+#time.hidden,
+#date.hidden {
   display: none;
 }
 

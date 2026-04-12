@@ -30,6 +30,8 @@ var favoritesEnabledToggle = document.getElementById("favorites-enabled-toggle")
 var clockSizeInput = document.getElementById("clock-size");
 var clockXInput = document.getElementById("clock-x");
 var clockYInput = document.getElementById("clock-y");
+var clockHiddenToggle = document.getElementById("clock-hidden-toggle");
+var dateHiddenToggle = document.getElementById("date-hidden-toggle");
 
 var searchWidthInput = document.getElementById("search-width");
 var searchXInput = document.getElementById("search-x");
@@ -554,6 +556,14 @@ clockYInput.addEventListener("input", function() {
     localStorage.setItem(STORAGE_KEYS.CLOCK_Y, this.value);
     markUserTheme();
     docStyle.setProperty("--clock-y", `${this.value}px`);
+});
+clockHiddenToggle.addEventListener("change", function() {
+    localStorage.setItem(STORAGE_KEYS.CLOCK_HIDDEN, this.checked ? "true" : "false");
+    applyClockVisibility();
+});
+dateHiddenToggle.addEventListener("change", function() {
+    localStorage.setItem(STORAGE_KEYS.DATE_HIDDEN, this.checked ? "true" : "false");
+    applyClockVisibility();
 });
 
 // Search Bar Controls

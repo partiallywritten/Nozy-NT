@@ -146,6 +146,10 @@ An empty string (`""`) for a string field clears/resets that setting.
   "clockX": "0",
   "clockY": "0",
 
+  "searchWidth": "560",
+  "searchX": "0",
+  "searchY": "0",
+
   "fontUrl": "https://fonts.googleapis.com/css2?family=Inter&display=swap",
   "fontFamily": "'Inter', sans-serif",
 
@@ -169,6 +173,9 @@ An empty string (`""`) for a string field clears/resets that setting.
 | `clockSize`      | numeric string   | `"8"`     | Clock font size in `rem` units (range: `2`–`14`)                            |
 | `clockX`         | numeric string   | `"0"`     | Horizontal offset of the clock in pixels (range: `-300`–`300`)              |
 | `clockY`         | numeric string   | `"0"`     | Vertical offset of the clock in pixels (range: `-300`–`300`)                |
+| `searchWidth`    | numeric string   | `"560"`   | Width of the search bar in pixels (range: `100`–`900`)                      |
+| `searchX`        | numeric string   | `"0"`     | Horizontal offset of the search bar in pixels (range: `-150`–`150`)         |
+| `searchY`        | numeric string   | `"0"`     | Vertical offset of the search bar in pixels (range: `-150`–`150`)           |
 | `fontUrl`        | URL string       | `""`      | URL of a CSS font stylesheet (e.g. Google Fonts). `""` = no custom font     |
 | `fontFamily`     | CSS font stack   | monospace stack | CSS `font-family` value applied to the whole page                    |
 | `bgBrightness`   | numeric string   | `"0"`     | Background brightness adjustment (range: `-100`–`100`)                      |
