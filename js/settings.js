@@ -60,6 +60,11 @@ var applyFaviconBtn = document.getElementById("apply-favicon");
 var clearFaviconBtn = document.getElementById("clear-favicon");
 var restoreDefaultsBtn = document.getElementById("restore-defaults");
 var exportThemeBtn = document.getElementById("export-theme-btn");
+var settingsBranding = document.getElementById("settings-branding");
+
+// --- Branding ---
+const version = chrome.runtime.getManifest().version ?? "unknown";
+settingsBranding.textContent = "NozyNT (v" + version + ")";
 
 var searchForm = document.getElementById("search-form");
 var searchInput = document.getElementById("search-input");
