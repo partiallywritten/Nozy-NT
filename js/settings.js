@@ -160,6 +160,36 @@ function syncBgCapSelectState() {
     bgImageCapSelect.title = isVideo ? "Quality cap does not apply to video backgrounds." : "";
 }
 
+function forceBgCapToDefault() {
+    localStorage.setItem(STORAGE_KEYS.BG_IMAGE_CAP, "default");
+    bgImageCapSelect.value = "default";
+}
+
+function isAnimatedWebpFile(file, callback) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var bytes = new Uint8Array(e.target.result);
+        // Verify RIFF....WEBP header
+        if (bytes.length < 12 ||
+            bytes[0] !== 0x52 || bytes[1] !== 0x49 || bytes[2] !== 0x46 || bytes[3] !== 0x46 ||
+            bytes[8] !== 0x57 || bytes[9] !== 0x45 || bytes[10] !== 0x42 || bytes[11] !== 0x50) {
+            callback(false);
+            return;
+        }
+        // Presence of an ANIM chunk indicates animated WebP
+        for (var i = 12; i < bytes.length - 3; i++) {
+            if (bytes[i] === 0x41 && bytes[i+1] === 0x4E && bytes[i+2] === 0x49 && bytes[i+3] === 0x4D) {
+                callback(true);
+                return;
+            }
+        }
+        callback(false);
+    };
+    reader.onerror = function() { callback(false); };
+    // ANIM chunk appears within the first few hundred bytes; 1 KB is more than sufficient
+    reader.readAsArrayBuffer(file.slice(0, 1024));
+}
+
 function processUrlInput(inputEl, errorEl, errorMessage, onSuccess) {
     var raw = inputEl.value.trim();
     if (!raw) return;
@@ -199,6 +229,7 @@ function getBgImageCapDimensions() {
 function applyLocalBackgroundFile(file) {
     if (!file) return;
     if (file.type === "video/mp4" || file.type === "video/webm") {
+        forceBgCapToDefault();
         readVideoFile(file, bgImageError, function(videoFile) {
             bgImageInput.value = "";
             bgImageInput.removeAttribute("aria-invalid");
@@ -216,6 +247,32 @@ function applyLocalBackgroundFile(file) {
         bgImageInput.value = "";
         bgImageInput.removeAttribute("aria-invalid");
         markUserTheme();
+        if (file.type === "image/gif") {
+            forceBgCapToDefault();
+            setBodyBgImage(dataUrl);
+            saveBgImage(dataUrl);
+            syncBgCapSelectState();
+            return;
+        }
+        if (file.type === "image/webp") {
+            isAnimatedWebpFile(file, function(animated) {
+                if (animated) forceBgCapToDefault();
+                // Read dims after forceBgCapToDefault() so animated WebPs always get null dims
+                var dims = getBgImageCapDimensions();
+                if (!dims) {
+                    setBodyBgImage(dataUrl);
+                    saveBgImage(dataUrl);
+                    syncBgCapSelectState();
+                } else {
+                    compressImage(dataUrl, dims.width, dims.height, 0.8, function(compressed) {
+                        setBodyBgImage(compressed);
+                        saveBgImage(compressed);
+                        syncBgCapSelectState();
+                    });
+                }
+            });
+            return;
+        }
         var dims = getBgImageCapDimensions();
         if (!dims) {
             setBodyBgImage(dataUrl);
@@ -245,6 +302,11 @@ function migrateBgImageForNewCap() {
             saveBgImage(current); // routes to IDB since cap is now "default"
         } else {
             // Moving to a sized cap — compress and save to chrome.storage.local
+            // GIFs and WebPs must not be re-compressed (canvas strips animation)
+            if (current.startsWith("data:image/gif") || current.startsWith("data:image/webp")) {
+                saveBgImage(current);
+                return;
+            }
             compressImage(current, dims.width, dims.height, 0.8, function(compressed) {
                 setBodyBgImage(compressed);
                 saveBgImage(compressed); // routes to chrome.storage.local since cap != "default"
