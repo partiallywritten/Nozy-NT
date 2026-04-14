@@ -17,6 +17,10 @@
   "favoritesEnabled": true,
   "clockHidden": false,
   "dateHidden": false,
-  "tabName": "🎭 Come home",
-  "favicon": ""
+  "tabName": "\ud83c\udfad Come home",
+  "favicon": "",
+  "favoritesShowAddBtn": true,
+  "favoritesLayout": "row",
+  "favoritesX": "0",
+  "favoritesY": "0"
 }

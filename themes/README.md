@@ -163,6 +163,11 @@ An empty string (`""`) for a string field clears/resets that setting.
   "bgImageEnabled": true,
 
   "favoritesEnabled": true,
+  "favoritesShowAddBtn": true,
+  "favoritesLayout": "row",
+  "favoritesX": "0",
+  "favoritesY": "0",
+
   "clockHidden": false,
   "dateHidden": false,
 
@@ -190,6 +195,10 @@ An empty string (`""`) for a string field clears/resets that setting.
 | `bgBrightness`   | numeric string   | `"0"`     | Background brightness adjustment (range: `-100`–`100`)                      |
 | `bgImageEnabled` | boolean          | `true`    | Whether the background image is shown (`true`) or hidden (`false`)          |
 | `favoritesEnabled` | boolean        | `true`    | Whether the favorites section is shown (`true`) or hidden (`false`)         |
+| `favoritesShowAddBtn` | boolean     | `true`    | Whether the [+] add-favorite button is shown (`true`) or hidden (`false`)   |
+| `favoritesLayout` | string          | `"row"`   | Layout of the favorites grid: `"row"` (default, wrapping rows) or `"column"` (vertical stack) |
+| `favoritesX`     | numeric string   | `"0"`     | Horizontal offset of the favorites section as a fraction of the viewport width. Same sign convention as `clockX`. |
+| `favoritesY`     | numeric string   | `"0"`     | Vertical offset of the favorites section as a fraction of the viewport height. Same sign convention as `clockY`. |
 | `clockHidden`    | boolean          | `false`   | Whether the clock is hidden (`true`) or visible (`false`)                   |
 | `dateHidden`     | boolean          | `false`   | Whether the date is hidden (`true`) or visible (`false`)                    |
 | `tabName`        | string           | `""`      | Browser tab title. `""` = shows `"New Tab"`                                 |

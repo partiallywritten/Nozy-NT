@@ -52,6 +52,9 @@ function applyThemePreset(theme, themeId) {
     set(STORAGE_KEYS.BG_BRIGHTNESS, theme.bgBrightness);
     set(STORAGE_KEYS.TAB_NAME, theme.tabName);
     set(STORAGE_KEYS.FAVICON, theme.favicon);
+    set(STORAGE_KEYS.FAVORITES_X, theme.favoritesX);
+    set(STORAGE_KEYS.FAVORITES_Y, theme.favoritesY);
+    set(STORAGE_KEYS.FAVORITES_LAYOUT, theme.favoritesLayout);
 
     var bgEnabled = theme.bgImageEnabled !== false;
     if (theme.bgImageEnabled !== null && theme.bgImageEnabled !== undefined) {
@@ -62,6 +65,10 @@ function applyThemePreset(theme, themeId) {
 
     if (theme.favoritesEnabled !== null && theme.favoritesEnabled !== undefined) {
         localStorage.setItem(STORAGE_KEYS.FAVORITES_ENABLED, theme.favoritesEnabled ? "true" : "false");
+    }
+
+    if (theme.favoritesShowAddBtn !== null && theme.favoritesShowAddBtn !== undefined) {
+        localStorage.setItem(STORAGE_KEYS.FAVORITES_SHOW_ADD_BTN, theme.favoritesShowAddBtn ? "true" : "false");
     }
 
     if (theme.clockHidden !== null && theme.clockHidden !== undefined) {
@@ -84,7 +91,7 @@ function applyThemePreset(theme, themeId) {
     applySearchBarSettings();
     applyFontSettings();
     applyGeneralSettings();
-    applyFavoritesEnabled();
+    applyFavoritesSettings();
     // Refresh dynamic position slider limits after theme values are applied
     if (typeof updatePositionSliderLimits === "function") {
         requestAnimationFrame(updatePositionSliderLimits);

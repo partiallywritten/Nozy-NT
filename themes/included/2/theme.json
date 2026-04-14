@@ -18,5 +18,9 @@
   "clockHidden": false,
   "dateHidden": false,
   "tabName": "Entertain me!",
-  "favicon": ""
+  "favicon": "",
+  "favoritesShowAddBtn": true,
+  "favoritesLayout": "row",
+  "favoritesX": "0",
+  "favoritesY": "0"
 }

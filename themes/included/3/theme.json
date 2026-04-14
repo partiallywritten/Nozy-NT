@@ -17,6 +17,10 @@
   "favoritesEnabled": true,
   "clockHidden": false,
   "dateHidden": false,
-  "tabName": "⛓️Where are We?",
-  "favicon": ""
+  "tabName": "\u26d3\ufe0fWhere are We?",
+  "favicon": "",
+  "favoritesShowAddBtn": true,
+  "favoritesLayout": "row",
+  "favoritesX": "0",
+  "favoritesY": "0"
 }
