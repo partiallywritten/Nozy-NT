@@ -28,7 +28,7 @@ var bgImageToggle = document.getElementById("bg-image-toggle");
 
 var favoritesEnabledToggle = document.getElementById("favorites-enabled-toggle");
 var favoritesShowAddToggle = document.getElementById("favorites-show-add-toggle");
-var favoritesColumnToggle = document.getElementById("favorites-column-toggle");
+var favoritesLayoutSelect = document.getElementById("favorites-layout-select");
 var favoritesXInput = document.getElementById("favorites-x");
 var favoritesYInput = document.getElementById("favorites-y");
 
@@ -66,10 +66,28 @@ var clearFaviconBtn = document.getElementById("clear-favicon");
 var restoreDefaultsBtn = document.getElementById("restore-defaults");
 var exportThemeBtn = document.getElementById("export-theme-btn");
 var settingsBranding = document.getElementById("settings-branding");
+var settingsVersionEl = document.getElementById("settings-version");
+var updateNotice = document.getElementById("update-notice");
+var updateVersionEl = document.getElementById("update-version");
 
 // --- Branding ---
 const version = chrome.runtime.getManifest().version ?? "unknown";
-settingsBranding.textContent = "Nozy-NT (v" + version + ")";
+settingsBranding.textContent = "Nozy-NT";
+settingsVersionEl.textContent = "(v" + version + ")";
+
+// --- Lazy version check (lowest priority) ---
+setTimeout(function () {
+  fetch("https://raw.githubusercontent.com/partiallywritten/Nozy-NT/refs/heads/main/manifest.json")
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      var latestVersion = data && data.version;
+      if (latestVersion && latestVersion !== version) {
+        updateVersionEl.textContent = latestVersion;
+        updateNotice.classList.remove("hidden");
+      }
+    })
+    .catch(function () { /* silently ignore network errors */ });
+}, 0);
 
 var searchForm = document.getElementById("search-form");
 var searchInput = document.getElementById("search-input");
@@ -933,10 +951,11 @@ favoritesShowAddToggle.addEventListener("change", function() {
     if (btn) btn.classList.toggle("hidden", !this.checked);
 });
 
-favoritesColumnToggle.addEventListener("change", function() {
-    localStorage.setItem(STORAGE_KEYS.FAVORITES_LAYOUT, this.checked ? "column" : "row");
+favoritesLayoutSelect.addEventListener("change", function() {
+    var isColumn = this.value === "column";
+    localStorage.setItem(STORAGE_KEYS.FAVORITES_LAYOUT, this.value);
     var section = document.getElementById("favorites-section");
-    if (section) section.classList.toggle("favorites-column", this.checked);
+    if (section) section.classList.toggle("favorites-column", isColumn);
     requestAnimationFrame(updatePositionSliderLimits);
 });
 
