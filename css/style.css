@@ -8,6 +8,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --bg-color: #003056;
   --surface: rgba(0, 48, 86, 0.52);
   --surface-hover: rgba(190, 157, 168, 0.16);
@@ -604,6 +605,32 @@ input[type="range"] {
 
 .file-input {
   padding: 0.42rem 0.55rem;
+}
+
+/* Style the "Choose File" button inside file inputs */
+.file-input::file-selector-button {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  padding: 0.28rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 0.55rem;
+  transition: background var(--transition);
+}
+
+.file-input::file-selector-button:hover,
+.file-input:hover::file-selector-button {
+  background: var(--accent-hover);
+}
+
+/* Style select dropdown options with theme colors */
+select.text-input option {
+  background-color: var(--panel-bg);
+  color: var(--text);
 }
 
 .setting-inline-label {
