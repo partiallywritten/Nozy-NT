@@ -753,6 +753,24 @@ function updatePositionSliderLimits() {
             clockXInput.max = clockMaxX;
             clockYInput.min = clockMinY;
             clockYInput.max = clockMaxY;
+
+            // Re-derive the displayed position from the stored fraction and clamp it
+            // so the element stays on-screen after every resize.
+            var clockXIdeal = fracToPx(localStorage.getItem(STORAGE_KEYS.CLOCK_X) || 0, vw);
+            var clockYIdeal = fracToPx(localStorage.getItem(STORAGE_KEYS.CLOCK_Y) || 0, vh);
+            var clockXClamped = Math.min(clockMaxX, Math.max(clockMinX, clockXIdeal));
+            var clockYClamped = Math.min(clockMaxY, Math.max(clockMinY, clockYIdeal));
+            clockXInput.value = clockXClamped;
+            clockYInput.value = clockYClamped;
+            docStyle.setProperty("--clock-x", clockXClamped + "px");
+            docStyle.setProperty("--clock-y", clockYClamped + "px");
+            // Persist the clamped fraction so the next resize starts from a valid baseline.
+            if (clockXClamped !== clockXIdeal) {
+                localStorage.setItem(STORAGE_KEYS.CLOCK_X, String(clockXClamped / vw));
+            }
+            if (clockYClamped !== clockYIdeal) {
+                localStorage.setItem(STORAGE_KEYS.CLOCK_Y, String(clockYClamped / vh));
+            }
         }
     }
 
@@ -784,6 +802,23 @@ function updatePositionSliderLimits() {
             searchXInput.max = searchMaxX;
             searchYInput.min = searchMinY;
             searchYInput.max = searchMaxY;
+
+            // Re-derive the displayed position from the stored fraction and clamp it.
+            var searchXIdeal = fracToPx(localStorage.getItem(STORAGE_KEYS.SEARCH_X) || 0, vw);
+            var searchYIdeal = fracToPx(localStorage.getItem(STORAGE_KEYS.SEARCH_Y) || 0, vh);
+            var searchXClamped = Math.min(searchMaxX, Math.max(searchMinX, searchXIdeal));
+            var searchYClamped = Math.min(searchMaxY, Math.max(searchMinY, searchYIdeal));
+            searchXInput.value = searchXClamped;
+            searchYInput.value = searchYClamped;
+            docStyle.setProperty("--search-x", searchXClamped + "px");
+            docStyle.setProperty("--search-y", searchYClamped + "px");
+            // Persist the clamped fraction so the next resize starts from a valid baseline.
+            if (searchXClamped !== searchXIdeal) {
+                localStorage.setItem(STORAGE_KEYS.SEARCH_X, String(searchXClamped / vw));
+            }
+            if (searchYClamped !== searchYIdeal) {
+                localStorage.setItem(STORAGE_KEYS.SEARCH_Y, String(searchYClamped / vh));
+            }
         }
     }
 }
@@ -809,14 +844,14 @@ clockXInput.addEventListener("input", function() {
     docStyle.setProperty("--clock-x", `${this.value}px`);
 });
 clockXInput.addEventListener("change", function() {
-    localStorage.setItem(STORAGE_KEYS.CLOCK_X, this.value);
+    localStorage.setItem(STORAGE_KEYS.CLOCK_X, String(Number(this.value) / window.innerWidth));
     markUserTheme();
 });
 clockYInput.addEventListener("input", function() {
     docStyle.setProperty("--clock-y", `${this.value}px`);
 });
 clockYInput.addEventListener("change", function() {
-    localStorage.setItem(STORAGE_KEYS.CLOCK_Y, this.value);
+    localStorage.setItem(STORAGE_KEYS.CLOCK_Y, String(Number(this.value) / window.innerHeight));
     markUserTheme();
 });
 clockHiddenToggle.addEventListener("change", function() {
@@ -834,6 +869,7 @@ searchWidthInput.addEventListener("input", function() {
 });
 searchWidthInput.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.SEARCH_WIDTH, this.value);
+    markUserTheme();
     // Search form width changed — refresh position limits
     requestAnimationFrame(updatePositionSliderLimits);
 });
@@ -841,13 +877,15 @@ searchXInput.addEventListener("input", function() {
     docStyle.setProperty("--search-x", `${this.value}px`);
 });
 searchXInput.addEventListener("change", function() {
-    localStorage.setItem(STORAGE_KEYS.SEARCH_X, this.value);
+    localStorage.setItem(STORAGE_KEYS.SEARCH_X, String(Number(this.value) / window.innerWidth));
+    markUserTheme();
 });
 searchYInput.addEventListener("input", function() {
     docStyle.setProperty("--search-y", `${this.value}px`);
 });
 searchYInput.addEventListener("change", function() {
-    localStorage.setItem(STORAGE_KEYS.SEARCH_Y, this.value);
+    localStorage.setItem(STORAGE_KEYS.SEARCH_Y, String(Number(this.value) / window.innerHeight));
+    markUserTheme();
 });
 
 // Background Controls
