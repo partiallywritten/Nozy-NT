@@ -204,18 +204,9 @@ body {
   transition: transform var(--transition);
 }
 
-.favorites-section.hidden {
-  display: none;
-}
-
 .favorites-section.favorites-column .favorites-grid {
   flex-direction: column;
   flex-wrap: nowrap;
-}
-
-#time.hidden,
-#date.hidden {
-  display: none;
 }
 
 .favorites-grid {
@@ -326,10 +317,6 @@ body {
   color: var(--text);
 }
 
-.add-btn.hidden {
-  display: none;
-}
-
 /* ── Settings button ──────────────────────────────────────────── */
 .settings-btn {
   position: fixed;
@@ -364,7 +351,6 @@ body {
   height: 100vh;
   background: var(--panel-bg);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-left: 1px solid var(--border);
   transform: translateX(100%);
   transition: transform 0.28s ease;
@@ -420,10 +406,6 @@ body {
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--accent);
-}
-
-.settings-update-notice.hidden {
-  display: none;
 }
 
 .settings-body {
@@ -767,15 +749,10 @@ input[type="range"] {
   inset: 0;
   background: rgba(0, 0, 0, 0.62);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 300;
-}
-
-.modal-overlay.hidden {
-  display: none;
 }
 
 .modal {
@@ -926,14 +903,6 @@ input[type="range"] {
   width: 100%;
 }
 
-.browse-themes-btn.hidden {
-  display: none;
-}
-
-.export-theme-btn.hidden {
-  display: none;
-}
-
 /* ── Themes overlay ───────────────────────────────────────────── */
 .themes-overlay {
   position: fixed;
@@ -946,10 +915,6 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   z-index: 210;
-}
-
-.themes-overlay.hidden {
-  display: none;
 }
 
 .themes-overlay__header {
@@ -1079,4 +1044,9 @@ input[type="range"] {
   .time {
     font-size: clamp(2rem, var(--clock-size), 10rem);
   }
+}
+
+/* ── Visibility utility ───────────────────────────────────────── */
+.hidden {
+  display: none;
 }
