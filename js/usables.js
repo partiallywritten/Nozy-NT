@@ -143,15 +143,23 @@ function _clearBgIdb(callback) {
 
 // --- Background Helpers ---
 
-function _getBgImageFallback() {
+function _getBgImageFromLocalStorage() {
     var fallback = localStorage.getItem(STORAGE_KEYS.BG_IMAGE) || "";
-    if (!fallback) return "";
     return sanitizeHttpUrl(fallback) || "";
+}
+
+function _setBgImageFallback(value) {
+    var safeUrl = sanitizeHttpUrl(value);
+    if (!value || !safeUrl) {
+        localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
+        return;
+    }
+    localStorage.setItem(STORAGE_KEYS.BG_IMAGE, safeUrl);
 }
 
 function getBgImage(callback) {
     _whenBgDbReady(function() {
-        var fallback = _getBgImageFallback();
+        var fallback = _getBgImageFromLocalStorage();
         if (_bgDb) {
             var tx = _bgDb.transaction("bg", "readonly");
             var req = tx.objectStore("bg").get("bg_image");
@@ -182,30 +190,33 @@ function saveBgImage(value, callback) {
         return;
     }
     localStorage.setItem(STORAGE_KEYS.BG_IMAGE_TYPE, "image"); // only reached when value is non-empty
-    var safeUrl = sanitizeHttpUrl(value);
-    if (safeUrl) localStorage.setItem(STORAGE_KEYS.BG_IMAGE, safeUrl);
-    else localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
     _whenBgDbReady(function() {
+        if (!_bgDb) {
+            _setBgImageFallback(value);
+            cb();
+            return;
+        }
+        localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
         var cap = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_CAP) || DEFAULTS.BG_IMAGE_CAP;
-        if (cap === "default" && value.startsWith("data:image/") && _bgDb) {
+        if (cap === "default" && value.startsWith("data:image/")) {
             var blob = _dataUrlToBlob(value);
             var tx = _bgDb.transaction("bg", "readwrite");
             var req = tx.objectStore("bg").put(blob, "bg_image");
             req.onsuccess = function() { cb(); };
             req.onerror = function() {
                 // IDB write failed — fall back to storing the data URL string in IDB
-                if (!_bgDb) { cb(); return; }
+                if (!_bgDb) { _setBgImageFallback(value); cb(); return; }
                 var tx2 = _bgDb.transaction("bg", "readwrite");
                 tx2.objectStore("bg").put(value, "bg_image").onsuccess = function() { cb(); };
-                tx2.onerror = function() { cb(); };
+                tx2.onerror = function() { _setBgImageFallback(value); cb(); };
             };
         } else {
             // Revoke any stale ObjectURL and store as a string (URL/data URL) in IDB
             if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
-            if (!_bgDb) { cb(); return; }
             var tx = _bgDb.transaction("bg", "readwrite");
             var req = tx.objectStore("bg").put(value, "bg_image");
-            req.onsuccess = req.onerror = function() { cb(); };
+            req.onsuccess = function() { cb(); };
+            req.onerror = function() { _setBgImageFallback(value); cb(); };
         }
     });
 }
