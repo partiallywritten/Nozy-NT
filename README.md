@@ -18,15 +18,21 @@ Best way to explore the customizations is by downloading the extension and headi
 - General
     - Tab name
     - Tab favicon
+- Favorites
     - Toggle on/off favorites
+    - Toggle on/off add button
+    - Select layout (column / row)
+    - Favorties postion horizontally and vertically (adjusted via sliders).
 - Search
     - Search url: Uses `https://search.mydomain.com/?q={query}` format. As long as your url is syntactically valid and has the `{query}` identifier in it, you can use anything.
     - Search bar width
-    - Search bar postion in x,y coordinates (adjusted via sliders. has limitations in freedom).
+    - Search bar postion horizontally and vertically (adjusted via sliders).
 - Background
-    - Colored background (disable background image)
+    - Enable / Disable background (forces to use colored background)
+    - Background brightness
+    - Background quality cap: in which resolution the background(images only) should be saved. recommended is `1080p`
+    - Max file size of background media (default at 50mb and hard capped at 250mb)
     - Static / **Animated** background via either local file or url
-    - Background image quality cap (in which resolution the background image should be saved. recommended is `1080p`)
 - Theme
     - Enable themes: This unlocks custom themes. Click on "Browse Themes" to explore themes
     - Background color
@@ -34,10 +40,10 @@ Best way to explore the customizations is by downloading the extension and headi
     - Highlight color
     - Export current theme (little download icon next to extension name. only appears if any changes has been made to the current theme)
 - Clock
-    - Hide clock
-    - Hide date
-    - Clock size
-    - Clock postion in x,y coordinates (adjusted via sliders. has limitations in freedom).
+    - Show / Hide clock
+    - Show / Hide date
+    - Adjust clock size
+    - Clock postion horizontally and vertically (adjusted via sliders).
 - Font
     - Font change using url and font family fields (same as you'd do in css)
 
