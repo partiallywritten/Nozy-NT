@@ -186,6 +186,7 @@ function createThemeCard(idStr, name, isActive) {
     var img = document.createElement("img");
     img.src = getThemeFolder(idStr) + "/preview.webp";
     img.onerror = function() {
+        img.onerror = null;
         img.onerror = function() {
             img.onerror = null;
             img.src = getThemeFolder(idStr) + "/background.jpg";
