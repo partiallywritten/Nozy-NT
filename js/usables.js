@@ -133,16 +133,33 @@ function _dataUrlToBlob(dataUrl) {
 }
 
 function _clearBgIdb(callback) {
-    if (!_bgDb) { if (callback) callback(); return; }
-    var tx = _bgDb.transaction("bg", "readwrite");
-    var req = tx.objectStore("bg").delete("bg_image");
-    req.onsuccess = req.onerror = callback || function() {};
+    _whenBgDbReady(function() {
+        if (!_bgDb) { if (callback) callback(); return; }
+        var tx = _bgDb.transaction("bg", "readwrite");
+        var req = tx.objectStore("bg").delete("bg_image");
+        req.onsuccess = req.onerror = callback || function() {};
+    });
 }
 
 // --- Background Helpers ---
 
+function _getBgImageFromLocalStorage() {
+    var fallback = localStorage.getItem(STORAGE_KEYS.BG_IMAGE) || "";
+    return sanitizeHttpUrl(fallback) || "";
+}
+
+function _setBgImageFallback(value) {
+    var safeUrl = sanitizeHttpUrl(value);
+    if (!value || !safeUrl) {
+        localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
+        return;
+    }
+    localStorage.setItem(STORAGE_KEYS.BG_IMAGE, safeUrl);
+}
+
 function getBgImage(callback) {
     _whenBgDbReady(function() {
+        var fallback = _getBgImageFromLocalStorage();
         if (_bgDb) {
             var tx = _bgDb.transaction("bg", "readonly");
             var req = tx.objectStore("bg").get("bg_image");
@@ -154,11 +171,11 @@ function getBgImage(callback) {
                     callback(_bgObjectUrl);
                     return;
                 }
-                callback(typeof stored === "string" ? stored : "");
+                callback(typeof stored === "string" ? stored : fallback);
             };
-            req.onerror = function() { callback(""); };
+            req.onerror = function() { callback(fallback); };
         } else {
-            callback("");
+            callback(fallback);
         }
     });
 }
@@ -168,44 +185,56 @@ function saveBgImage(value, callback) {
     if (!value) {
         if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
         localStorage.removeItem(STORAGE_KEYS.BG_IMAGE_TYPE);
+        localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
         _clearBgIdb(cb);
         return;
     }
     localStorage.setItem(STORAGE_KEYS.BG_IMAGE_TYPE, "image"); // only reached when value is non-empty
-    var cap = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_CAP) || DEFAULTS.BG_IMAGE_CAP;
-    if (cap === "default" && value.startsWith("data:image/") && _bgDb) {
-        var blob = _dataUrlToBlob(value);
-        var tx = _bgDb.transaction("bg", "readwrite");
-        var req = tx.objectStore("bg").put(blob, "bg_image");
-        req.onsuccess = function() { cb(); };
-        req.onerror = function() {
-            // IDB write failed — fall back to storing the data URL string in IDB
-            if (!_bgDb) { cb(); return; }
-            var tx2 = _bgDb.transaction("bg", "readwrite");
-            tx2.objectStore("bg").put(value, "bg_image").onsuccess = function() { cb(); };
-            tx2.onerror = function() { cb(); };
-        };
-    } else {
-        // Revoke any stale ObjectURL and store as a string (URL/data URL) in IDB
-        if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
-        if (!_bgDb) { cb(); return; }
-        var tx = _bgDb.transaction("bg", "readwrite");
-        var req = tx.objectStore("bg").put(value, "bg_image");
-        req.onsuccess = req.onerror = function() { cb(); };
-    }
+    _whenBgDbReady(function() {
+        if (!_bgDb) {
+            _setBgImageFallback(value);
+            cb();
+            return;
+        }
+        localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
+        var cap = localStorage.getItem(STORAGE_KEYS.BG_IMAGE_CAP) || DEFAULTS.BG_IMAGE_CAP;
+        if (cap === "default" && value.startsWith("data:image/")) {
+            var blob = _dataUrlToBlob(value);
+            var tx = _bgDb.transaction("bg", "readwrite");
+            var req = tx.objectStore("bg").put(blob, "bg_image");
+            req.onsuccess = function() { cb(); };
+            req.onerror = function() {
+                // IDB write failed — fall back to storing the data URL string in IDB
+                if (!_bgDb) { _setBgImageFallback(value); cb(); return; }
+                var tx2 = _bgDb.transaction("bg", "readwrite");
+                tx2.objectStore("bg").put(value, "bg_image").onsuccess = function() { cb(); };
+                tx2.onerror = function() { _setBgImageFallback(value); cb(); };
+            };
+        } else {
+            // Revoke any stale ObjectURL and store as a string (URL/data URL) in IDB
+            if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
+            var tx = _bgDb.transaction("bg", "readwrite");
+            var req = tx.objectStore("bg").put(value, "bg_image");
+            req.onsuccess = function() { cb(); };
+            req.onerror = function() { _setBgImageFallback(value); cb(); };
+        }
+    });
 }
 
 // Stores a media blob directly in IndexedDB. BG_IMAGE_TYPE tracks what kind of
 // background is active; the actual data lives in IDB (read back via getBgImage → createObjectURL).
 function _saveBlobToIdb(blob, mediaType, callback) {
     localStorage.setItem(STORAGE_KEYS.BG_IMAGE_TYPE, mediaType);
+    localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
     var cb = callback || function() {};
     if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
-    if (!_bgDb) { cb(); return; }
-    var tx = _bgDb.transaction("bg", "readwrite");
-    var req = tx.objectStore("bg").put(blob, "bg_image");
-    req.onsuccess = function() { cb(); };
-    req.onerror = function() { cb(); };
+    _whenBgDbReady(function() {
+        if (!_bgDb) { cb(); return; }
+        var tx = _bgDb.transaction("bg", "readwrite");
+        var req = tx.objectStore("bg").put(blob, "bg_image");
+        req.onsuccess = function() { cb(); };
+        req.onerror = function() { cb(); };
+    });
 }
 
 function saveBgVideo(blob, callback) {
