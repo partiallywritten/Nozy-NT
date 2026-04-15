@@ -316,14 +316,14 @@ function migrateBgImageForNewCap() {
     getBgImage(function(current) {
         if (!current) return;
         var isLocal = current.startsWith("data:image/") || current.startsWith("blob:");
-        if (!isLocal) return; // remote URLs live in chrome.storage.local regardless of cap
+        if (!isLocal) return; // remote URLs are stored in IDB regardless of cap
         var dims = getBgImageCapDimensions();
         if (!dims) {
-            // Moving to "default" — only migrate if the image is currently in chrome.storage.local
+            // Moving to "default" — only migrate if the image is currently a data URL (not yet a blob in IDB)
             if (current.startsWith("blob:")) return; // already in IDB, nothing to do
             saveBgImage(current); // routes to IDB since cap is now "default"
         } else {
-            // Moving to a sized cap — compress and save to chrome.storage.local
+            // Moving to a sized cap — compress and save to IDB
             // GIFs and WebPs must not be re-compressed (canvas strips animation)
             if (current.startsWith("data:image/gif") || current.startsWith("data:image/webp")) {
                 saveBgImage(current);
@@ -331,7 +331,7 @@ function migrateBgImageForNewCap() {
             }
             compressImage(current, dims.width, dims.height, 0.8, function(compressed) {
                 setBodyBgImage(compressed);
-                saveBgImage(compressed); // routes to chrome.storage.local since cap != "default"
+                saveBgImage(compressed); // routes to IDB since cap != "default"
             });
         }
     });
