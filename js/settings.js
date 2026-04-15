@@ -71,12 +71,12 @@ var updateNotice = document.getElementById("update-notice");
 var updateVersionEl = document.getElementById("update-version");
 
 // --- Branding ---
-const version = chrome.runtime.getManifest().version ?? "unknown";
+const version = chrome.runtime.getManifest().version;
 settingsBranding.textContent = "Nozy-NT";
 settingsVersionEl.textContent = "(v" + version + ")";
 
 // --- Lazy version check (lowest priority) ---
-setTimeout(function () {
+requestIdleCallback(function () {
   fetch("https://raw.githubusercontent.com/partiallywritten/Nozy-NT/refs/heads/main/manifest.json")
     .then(function (res) { return res.json(); })
     .then(function (data) {
@@ -87,7 +87,7 @@ setTimeout(function () {
       }
     })
     .catch(function () { /* silently ignore network errors */ });
-}, 0);
+}, { timeout: 5000 });
 
 var searchForm = document.getElementById("search-form");
 var searchInput = document.getElementById("search-input");
@@ -316,14 +316,14 @@ function migrateBgImageForNewCap() {
     getBgImage(function(current) {
         if (!current) return;
         var isLocal = current.startsWith("data:image/") || current.startsWith("blob:");
-        if (!isLocal) return; // remote URLs live in chrome.storage.local regardless of cap
+        if (!isLocal) return; // remote URLs are stored in IDB regardless of cap
         var dims = getBgImageCapDimensions();
         if (!dims) {
-            // Moving to "default" — only migrate if the image is currently in chrome.storage.local
+            // Moving to "default" — only migrate if the image is currently a data URL (not yet a blob in IDB)
             if (current.startsWith("blob:")) return; // already in IDB, nothing to do
             saveBgImage(current); // routes to IDB since cap is now "default"
         } else {
-            // Moving to a sized cap — compress and save to chrome.storage.local
+            // Moving to a sized cap — compress and save to IDB
             // GIFs and WebPs must not be re-compressed (canvas strips animation)
             if (current.startsWith("data:image/gif") || current.startsWith("data:image/webp")) {
                 saveBgImage(current);
@@ -331,7 +331,7 @@ function migrateBgImageForNewCap() {
             }
             compressImage(current, dims.width, dims.height, 0.8, function(compressed) {
                 setBodyBgImage(compressed);
-                saveBgImage(compressed); // routes to chrome.storage.local since cap != "default"
+                saveBgImage(compressed); // routes to IDB since cap != "default"
             });
         }
     });
@@ -874,6 +874,17 @@ window.addEventListener("resize", function() {
     _posLimitsResizeTimer = setTimeout(updatePositionSliderLimits, 100);
 });
 
+// Coalescing guard: at most one rAF for updatePositionSliderLimits queued at a time
+var _rafPosLimitsPending = false;
+function schedulePositionSliderLimits() {
+    if (_rafPosLimitsPending) return;
+    _rafPosLimitsPending = true;
+    requestAnimationFrame(function() {
+        _rafPosLimitsPending = false;
+        updatePositionSliderLimits();
+    });
+}
+
 // Clock Inputs
 clockSizeInput.addEventListener("input", function() {
     docStyle.setProperty("--clock-size", `${this.value}rem`);
@@ -882,7 +893,7 @@ clockSizeInput.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.CLOCK_SIZE, this.value);
     markUserTheme();
     // Clock element size may have changed — refresh position limits
-    requestAnimationFrame(updatePositionSliderLimits);
+    schedulePositionSliderLimits();
 });
 clockXInput.addEventListener("input", function() {
     docStyle.setProperty("--clock-x", `${this.value}px`);
@@ -915,7 +926,7 @@ searchWidthInput.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.SEARCH_WIDTH, this.value);
     markUserTheme();
     // Search form width changed — refresh position limits
-    requestAnimationFrame(updatePositionSliderLimits);
+    schedulePositionSliderLimits();
 });
 searchXInput.addEventListener("input", function() {
     docStyle.setProperty("--search-x", `${this.value}px`);
@@ -956,7 +967,7 @@ favoritesLayoutSelect.addEventListener("change", function() {
     localStorage.setItem(STORAGE_KEYS.FAVORITES_LAYOUT, this.value);
     var section = document.getElementById("favorites-section");
     if (section) section.classList.toggle("favorites-column", isColumn);
-    requestAnimationFrame(updatePositionSliderLimits);
+    schedulePositionSliderLimits();
 });
 
 favoritesXInput.addEventListener("input", function() {

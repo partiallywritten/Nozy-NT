@@ -57,7 +57,6 @@ body {
   background-color: var(--bg-color);
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
   filter: brightness(var(--bg-image-brightness, 1));
   z-index: -1;
   pointer-events: none;
@@ -76,7 +75,6 @@ body {
   z-index: -1;
   pointer-events: none;
   filter: brightness(var(--bg-image-brightness, 1));
-  will-change: transform;
 }
 
 .background-video.bg-disabled {
@@ -204,18 +202,9 @@ body {
   transition: transform var(--transition);
 }
 
-.favorites-section.hidden {
-  display: none;
-}
-
 .favorites-section.favorites-column .favorites-grid {
   flex-direction: column;
   flex-wrap: nowrap;
-}
-
-#time.hidden,
-#date.hidden {
-  display: none;
 }
 
 .favorites-grid {
@@ -304,15 +293,13 @@ body {
   pointer-events: auto;
 }
 
-/* ── Add button ───────────────────────────────────────────────── */
-.add-btn {
-  width: 44px;
-  height: 44px;
+/* ── Add button & Settings button — shared base ───────────────── */
+.add-btn,
+.settings-btn {
   border-radius: 50%;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-muted);
-  font-size: 1.35rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -320,14 +307,18 @@ body {
   transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
-.add-btn:hover {
+.add-btn:hover,
+.settings-btn:hover {
   background: var(--surface-hover);
   border-color: var(--accent);
   color: var(--text);
 }
 
-.add-btn.hidden {
-  display: none;
+/* ── Add button ───────────────────────────────────────────────── */
+.add-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 1.35rem;
 }
 
 /* ── Settings button ──────────────────────────────────────────── */
@@ -337,40 +328,28 @@ body {
   right: 1.5rem;
   width: 42px;
   height: 42px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
   z-index: 100;
 }
 
-.settings-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--accent);
-  color: var(--text);
-}
-
 /* ── Settings panel ───────────────────────────────────────────── */
-.settings-panel {
+.settings-panel,
+.themes-overlay {
   position: fixed;
   top: 0;
   right: 0;
   width: var(--panel-width);
-  height: 100vh;
   background: var(--panel-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-panel {
+  height: 100vh;
+  backdrop-filter: blur(12px);
   transform: translateX(100%);
   transition: transform 0.28s ease;
   z-index: 200;
-  display: flex;
-  flex-direction: column;
 }
 
 .settings-panel.open {
@@ -422,10 +401,6 @@ body {
   color: var(--accent);
 }
 
-.settings-update-notice.hidden {
-  display: none;
-}
-
 .settings-body {
   padding: 1.2rem 1.35rem;
   display: flex;
@@ -436,26 +411,6 @@ body {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) rgba(255, 255, 255, 0.08);
-}
-
-.settings-body::-webkit-scrollbar {
-  width: 10px;
-}
-
-.settings-body::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 999px;
-}
-
-.settings-body::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 999px;
-  border: 2px solid rgba(0, 0, 0, 0);
-  background-clip: padding-box;
-}
-
-.settings-body::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-hover);
 }
 
 .settings-section {
@@ -517,12 +472,19 @@ body {
   gap: 0.5rem;
 }
 
-.setting-group label {
+.setting-group label,
+.setting-group-label,
+.setting-inline-label {
   font-size: 0.73rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.09em;
+}
+
+.setting-inline-label {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .label-row {
@@ -675,16 +637,6 @@ select.text-input option {
   color: var(--text);
 }
 
-.setting-inline-label {
-  font-size: 0.73rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .setting-hint {
   font-size: 0.7rem;
   font-weight: 400;
@@ -767,15 +719,10 @@ input[type="range"] {
   inset: 0;
   background: rgba(0, 0, 0, 0.62);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 300;
-}
-
-.modal-overlay.hidden {
-  display: none;
 }
 
 .modal {
@@ -854,14 +801,6 @@ input[type="range"] {
   justify-content: space-between;
 }
 
-.setting-group-label {
-  font-size: 0.73rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-}
-
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -926,30 +865,10 @@ input[type="range"] {
   width: 100%;
 }
 
-.browse-themes-btn.hidden {
-  display: none;
-}
-
-.export-theme-btn.hidden {
-  display: none;
-}
-
 /* ── Themes overlay ───────────────────────────────────────────── */
 .themes-overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: var(--panel-width);
   height: 100%;
-  background: var(--panel-bg);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
   z-index: 210;
-}
-
-.themes-overlay.hidden {
-  display: none;
 }
 
 .themes-overlay__header {
@@ -1079,4 +998,9 @@ input[type="range"] {
   .time {
     font-size: clamp(2rem, var(--clock-size), 10rem);
   }
+}
+
+/* ── Visibility utility ───────────────────────────────────────── */
+.hidden {
+  display: none;
 }

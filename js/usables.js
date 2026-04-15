@@ -55,7 +55,6 @@ var STORAGE_KEYS = {
     SEARCH_URL: "ch_search_url",
     CLOCK_HIDDEN: "ch_clock_hidden",
     DATE_HIDDEN: "ch_date_hidden",
-    POS_FORMAT: "ch_pos_format",
 };
 
 // --- Cached DOM References ---
@@ -142,59 +141,34 @@ function _clearBgIdb(callback) {
 
 // --- Background Helpers ---
 
-function _getBgFromChromeStorage(callback) {
-    chrome.storage.local.get([STORAGE_KEYS.BG_IMAGE], function(result) {
-        var stored = result[STORAGE_KEYS.BG_IMAGE];
-        if (stored) {
-            callback(stored);
-            return;
-        }
-        var legacy = localStorage.getItem(STORAGE_KEYS.BG_IMAGE);
-        if (legacy) {
-            var obj = {};
-            obj[STORAGE_KEYS.BG_IMAGE] = legacy;
-            chrome.storage.local.set(obj, function() {
-                localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
-            });
-            callback(legacy);
-            return;
-        }
-        callback("");
-    });
-}
-
 function getBgImage(callback) {
     _whenBgDbReady(function() {
         if (_bgDb) {
             var tx = _bgDb.transaction("bg", "readonly");
             var req = tx.objectStore("bg").get("bg_image");
             req.onsuccess = function() {
-                var blob = req.result;
-                if (blob instanceof Blob) {
+                var stored = req.result;
+                if (stored instanceof Blob) {
                     if (_bgObjectUrl) URL.revokeObjectURL(_bgObjectUrl);
-                    _bgObjectUrl = URL.createObjectURL(blob);
+                    _bgObjectUrl = URL.createObjectURL(stored);
                     callback(_bgObjectUrl);
                     return;
                 }
-                _getBgFromChromeStorage(callback);
+                callback(typeof stored === "string" ? stored : "");
             };
-            req.onerror = function() {
-                _getBgFromChromeStorage(callback);
-            };
+            req.onerror = function() { callback(""); };
         } else {
-            _getBgFromChromeStorage(callback);
+            callback("");
         }
     });
 }
 
 function saveBgImage(value, callback) {
-    localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
     var cb = callback || function() {};
     if (!value) {
         if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
         localStorage.removeItem(STORAGE_KEYS.BG_IMAGE_TYPE);
-        _clearBgIdb();
-        chrome.storage.local.remove(STORAGE_KEYS.BG_IMAGE, cb);
+        _clearBgIdb(cb);
         return;
     }
     localStorage.setItem(STORAGE_KEYS.BG_IMAGE_TYPE, "image"); // only reached when value is non-empty
@@ -203,38 +177,34 @@ function saveBgImage(value, callback) {
         var blob = _dataUrlToBlob(value);
         var tx = _bgDb.transaction("bg", "readwrite");
         var req = tx.objectStore("bg").put(blob, "bg_image");
-        req.onsuccess = function() {
-            chrome.storage.local.remove(STORAGE_KEYS.BG_IMAGE, cb);
-        };
+        req.onsuccess = function() { cb(); };
         req.onerror = function() {
-            var obj = {};
-            obj[STORAGE_KEYS.BG_IMAGE] = value;
-            chrome.storage.local.set(obj, cb);
+            // IDB write failed — fall back to storing the data URL string in IDB
+            if (!_bgDb) { cb(); return; }
+            var tx2 = _bgDb.transaction("bg", "readwrite");
+            tx2.objectStore("bg").put(value, "bg_image").onsuccess = function() { cb(); };
+            tx2.onerror = function() { cb(); };
         };
     } else {
-        // Switching to chrome.storage.local — revoke any stale ObjectURL and clear IDB
+        // Revoke any stale ObjectURL and store as a string (URL/data URL) in IDB
         if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
-        _clearBgIdb();
-        var obj = {};
-        obj[STORAGE_KEYS.BG_IMAGE] = value;
-        chrome.storage.local.set(obj, cb);
+        if (!_bgDb) { cb(); return; }
+        var tx = _bgDb.transaction("bg", "readwrite");
+        var req = tx.objectStore("bg").put(value, "bg_image");
+        req.onsuccess = req.onerror = function() { cb(); };
     }
 }
 
-// Stores a media blob directly in IndexedDB and clears any stale data from
-// chrome.storage.local. BG_IMAGE_TYPE tracks what kind of background is active;
-// the actual data lives in IDB (read back via getBgImage → createObjectURL).
+// Stores a media blob directly in IndexedDB. BG_IMAGE_TYPE tracks what kind of
+// background is active; the actual data lives in IDB (read back via getBgImage → createObjectURL).
 function _saveBlobToIdb(blob, mediaType, callback) {
-    localStorage.removeItem(STORAGE_KEYS.BG_IMAGE);
     localStorage.setItem(STORAGE_KEYS.BG_IMAGE_TYPE, mediaType);
     var cb = callback || function() {};
     if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
     if (!_bgDb) { cb(); return; }
     var tx = _bgDb.transaction("bg", "readwrite");
     var req = tx.objectStore("bg").put(blob, "bg_image");
-    req.onsuccess = function() {
-        chrome.storage.local.remove(STORAGE_KEYS.BG_IMAGE, cb);
-    };
+    req.onsuccess = function() { cb(); };
     req.onerror = function() { cb(); };
 }
 
@@ -399,35 +369,6 @@ function applyBgFileSizeCapSetting() {
 function fracToPx(fracStr, dim) {
     var frac = Number(fracStr);
     return Number.isFinite(frac) ? Math.round(frac * dim) : 0;
-}
-
-/**
- * One-time migration: converts legacy absolute-pixel position values to viewport
- * fractions so they stay proportional across window resizes.
- * A value is treated as a legacy pixel offset if it is an integer with abs >= 2.
- * Runs once and marks ch_pos_format = "frac" so it is never repeated.
- */
-function migratePositionsToFrac() {
-    if (localStorage.getItem(STORAGE_KEYS.POS_FORMAT) === "frac") return;
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var pairs = [
-        { key: STORAGE_KEYS.CLOCK_X,  dim: vw },
-        { key: STORAGE_KEYS.CLOCK_Y,  dim: vh },
-        { key: STORAGE_KEYS.SEARCH_X, dim: vw },
-        { key: STORAGE_KEYS.SEARCH_Y, dim: vh },
-    ];
-    pairs.forEach(function(item) {
-        var raw = localStorage.getItem(item.key);
-        if (raw === null) return;
-        var val = Number(raw);
-        if (!Number.isFinite(val)) return;
-        // Legacy pixel values are integers with abs >= 2; convert them to fractions.
-        if (Number.isInteger(val) && Math.abs(val) >= 2) {
-            localStorage.setItem(item.key, String(val / item.dim));
-        }
-    });
-    localStorage.setItem(STORAGE_KEYS.POS_FORMAT, "frac");
 }
 
 function applyClockSettings() {
@@ -664,7 +605,3 @@ document.addEventListener("visibilitychange", function() {
 window.addEventListener("pagehide", function() {
     if (_bgObjectUrl) { URL.revokeObjectURL(_bgObjectUrl); _bgObjectUrl = null; }
 });
-
-// Migrate any legacy absolute-pixel position values to viewport fractions.
-// Must run after STORAGE_KEYS is defined and before apply functions consume stored positions.
-migratePositionsToFrac();
