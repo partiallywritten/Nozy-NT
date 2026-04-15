@@ -93,9 +93,7 @@ function applyThemePreset(theme, themeId) {
     applyGeneralSettings();
     applyFavoritesSettings();
     // Refresh dynamic position slider limits after theme values are applied
-    if (typeof updatePositionSliderLimits === "function") {
-        requestAnimationFrame(updatePositionSliderLimits);
-    }
+    requestAnimationFrame(updatePositionSliderLimits);
 
     // Fetch the theme background image, process through canvas (respecting cap), save as data URL
     if (!bgEnabled) {

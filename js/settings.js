@@ -71,7 +71,7 @@ var updateNotice = document.getElementById("update-notice");
 var updateVersionEl = document.getElementById("update-version");
 
 // --- Branding ---
-const version = chrome.runtime.getManifest().version ?? "unknown";
+const version = chrome.runtime.getManifest().version;
 settingsBranding.textContent = "Nozy-NT";
 settingsVersionEl.textContent = "(v" + version + ")";
 
