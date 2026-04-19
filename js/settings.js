@@ -560,27 +560,33 @@ function exportUserTheme() {
 
 // --- Import Theme ---
 
+// Parses local-file-header entries from an uncompressed zip (store method only).
+// Returns an array of { name, data } objects for each file entry found.
 function parseZipEntries(bytes) {
     var view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     var entries = [];
     var i = 0;
-    while (i < bytes.length - 4) {
+    while (i <= bytes.length - 30) {
         if (view.getUint32(i, true) !== 0x04034b50) break;
-        var flags = view.getUint16(i + 6, true);
         var nameLen = view.getUint16(i + 26, true);
         var extraLen = view.getUint16(i + 28, true);
         var compSize = view.getUint32(i + 18, true);
         var name = new TextDecoder().decode(bytes.subarray(i + 30, i + 30 + nameLen));
         var dataStart = i + 30 + nameLen + extraLen;
         var data = bytes.subarray(dataStart, dataStart + compSize);
-        entries.push({ name: name, data: data, flags: flags });
+        entries.push({ name: name, data: data });
         i = dataStart + compSize;
     }
     return entries;
 }
 
+// Imports a theme from a zip file. The zip must contain a theme.json and may
+// contain a background image/video. Background files are applied directly from
+// the zip rather than fetched from a theme folder.
 function importThemeFromZip(file) {
     if (!file) return;
+    // Matches background files with or without a leading folder segment
+    var bgFileRe = /(^|\/)background\.(webp|jpg|jpeg|webm|mp4)$/;
     var reader = new FileReader();
     reader.onload = function(e) {
         var bytes = new Uint8Array(e.target.result);
@@ -589,35 +595,40 @@ function importThemeFromZip(file) {
         var themeEntry = null;
         var bgEntry = null;
         entries.forEach(function(entry) {
-            if (/\/theme\.json$/.test(entry.name) || entry.name === "theme.json") {
+            if (/(^|\/)theme\.json$/.test(entry.name)) {
                 themeEntry = entry;
-            } else if (/\/(background\.(webp|jpg|jpeg|webm|mp4))$/.test(entry.name) || /^background\.(webp|jpg|jpeg|webm|mp4)$/.test(entry.name)) {
+            } else if (bgFileRe.test(entry.name)) {
                 bgEntry = entry;
             }
         });
 
-        if (!themeEntry) return;
+        if (!themeEntry) {
+            alert("Import failed: theme.json not found in the zip.");
+            return;
+        }
 
         var themeJson;
         try {
             themeJson = JSON.parse(new TextDecoder().decode(themeEntry.data));
         } catch (err) {
+            alert("Import failed: theme.json is not valid JSON.");
             return;
         }
 
-        // Derive the theme id from the zip filename or from theme.json
+        // Derive the theme id from the zip filename (nnt-* prefix) or fall back to "user"
         var themeId = "user";
         var zipName = file.name.replace(/\.zip$/i, "");
         if (/^nnt-/.test(zipName)) {
             themeId = zipName;
         }
 
-        // Apply theme settings; skip background fetching from folder since we supply it from the zip
+        // Pass bgImageEnabled:false so applyThemePreset does not attempt to fetch the
+        // background from a theme folder; we apply the background from the zip below.
         var themeForApply = Object.assign({}, themeJson, { bgImageEnabled: bgEntry ? false : themeJson.bgImageEnabled });
         applyThemePreset(themeForApply, themeId);
 
         if (bgEntry) {
-            // Enable background image since one was supplied in the zip
+            // Re-enable the background now that we are supplying it directly from the zip
             localStorage.setItem(STORAGE_KEYS.BG_IMAGE_ENABLED, "true");
             var bgName = bgEntry.name.split("/").pop();
             var isVideo = /\.(webm|mp4)$/.test(bgName);
@@ -656,6 +667,7 @@ function importThemeFromZip(file) {
     };
     reader.readAsArrayBuffer(file);
 }
+
 
 function openSettings() {
     settingsPanel.classList.add("open");
